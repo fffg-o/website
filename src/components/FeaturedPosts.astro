@@ -33,7 +33,7 @@ const posts: Post[] = [
   <div class="space-y-6">
     {
       posts.map((post) => (
-        <article class="group relative rounded-xl border border-border bg-white p-6 transition-all hover:border-primary/30 hover:shadow-md">
+        <article class="group relative rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
           <time class="mb-2 block text-xs text-text-muted">{post.date}</time>
           <h3 class="mb-2 text-lg font-semibold text-text">
             <a href={`/blog/${post.slug}`} class="after:absolute after:inset-0">

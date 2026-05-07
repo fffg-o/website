@@ -19,31 +19,67 @@ const { title, description } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description ?? '个人网站'} />
     <title>{title}</title>
+    <!-- 防止闪烁：在页面渲染前立即设置暗色模式 -->
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body class="min-h-screen bg-surface text-text antialiased">
     <!-- 导航栏 -->
-    <header class="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md">
+    <header class="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
       <nav class="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
         <a href="/" class="text-lg font-bold tracking-tight text-text transition-colors hover:text-primary">
           fffg
         </a>
-        <ul class="flex items-center gap-6">
-          <li>
-            <a href="/" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
-              首页
-            </a>
-          </li>
-          <li>
-            <a href="/blog" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
-              文章
-            </a>
-          </li>
-          <li>
-            <a href="/projects" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
-              项目
-            </a>
-          </li>
-        </ul>
+        <div class="flex items-center gap-6">
+          <ul class="flex items-center gap-6">
+            <li>
+              <a href="/" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                首页
+              </a>
+            </li>
+            <li>
+              <a href="/blog" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                文章
+              </a>
+            </li>
+            <li>
+              <a href="/projects" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                项目
+              </a>
+            </li>
+          </ul>
+
+          <!-- 暗色模式切换按钮 -->
+          <button
+            id="theme-toggle"
+            class="flex size-8 translate-y-[10%] items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-border hover:text-text"
+            aria-label="切换暗色模式"
+            title="切换暗色模式"
+          >
+            <!-- 太阳图标（亮色模式） -->
+            <svg id="sun-icon" class="hidden size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <!-- 月亮图标（暗色模式） -->
+            <svg id="moon-icon" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+        </div>
       </nav>
     </header>
 
@@ -60,3 +96,37 @@ const { title, description } = Astro.props;
     </footer>
   </body>
 </html>
+
+<script>
+  const toggle = document.getElementById('theme-toggle');
+  const sunIcon = document.getElementById('sun-icon');
+  const moonIcon = document.getElementById('moon-icon');
+  const html = document.documentElement;
+
+  function setTheme(theme: string) {
+    if (theme === 'dark') {
+      html.classList.add('dark');
+      sunIcon?.classList.remove('hidden');
+      moonIcon?.classList.add('hidden');
+    } else {
+      html.classList.remove('dark');
+      sunIcon?.classList.add('hidden');
+      moonIcon?.classList.remove('hidden');
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  // 根据当前状态初始化图标
+  if (html.classList.contains('dark')) {
+    sunIcon?.classList.remove('hidden');
+    moonIcon?.classList.add('hidden');
+  } else {
+    sunIcon?.classList.add('hidden');
+    moonIcon?.classList.remove('hidden');
+  }
+
+  toggle?.addEventListener('click', () => {
+    const isDark = html.classList.contains('dark');
+    setTheme(isDark ? 'light' : 'dark');
+  });
+</script>
