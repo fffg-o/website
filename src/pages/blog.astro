@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+export interface Post {
+  title: string;
+  description: string;
+  date: string;
+  slug: string;
+}
+
+const posts: Post[] = [
+  {
+    title: '使用 Astro 构建现代静态网站',
+    description: 'Astro 是一个全新的静态站点生成器，本文将介绍如何使用 Astro 构建高性能的静态网站。',
+    date: '2026-04-20',
+    slug: 'building-with-astro',
+  },
+  {
+    title: 'Tailwind CSS v4 新特性一览',
+    description: 'Tailwind CSS v4 带来了全新的引擎和 API，让我们一起来看看有哪些值得关注的变化。',
+    date: '2026-04-15',
+    slug: 'tailwind-v4-features',
+  },
+  {
+    title: '从零开始搭建 GitHub Actions CI/CD',
+    description: '本文将手把手教你如何为项目配置 GitHub Actions，实现自动化测试和部署。',
+    date: '2026-04-10',
+    slug: 'github-actions-guide',
+  },
+  {
+    title: '深入理解 TypeScript 类型系统',
+    description: 'TypeScript 的类型系统非常强大，本文将深入探讨一些高级类型技巧和最佳实践。',
+    date: '2026-04-05',
+    slug: 'typescript-type-system',
+  },
+  {
+    title: 'Rust 入门指南：从零开始',
+    description: 'Rust 是一门系统级编程语言，以其安全性和性能著称。本文适合零基础读者入门。',
+    date: '2026-03-28',
+    slug: 'rust-beginners-guide',
+  },
+];
+---
+
+<Layout title="文章 - fffg" description="技术文章与分享">
+  <section>
+    <h1 class="mb-8 text-3xl font-bold text-text">文章</h1>
+    <div class="space-y-6">
+      {
+        posts.map((post) => (
+          <article class="group rounded-xl border border-border bg-white p-6 transition-all hover:border-primary/30 hover:shadow-md">
+            <time class="mb-2 block text-xs text-text-muted">{post.date}</time>
+            <h2 class="mb-2 text-xl font-semibold text-text">
+              <a href={`/blog/${post.slug}`} class="after:absolute after:inset-0">
+                {post.title}
+              </a>
+            </h2>
+            <p class="text-sm leading-relaxed text-text-muted">
+              {post.description}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</Layout>

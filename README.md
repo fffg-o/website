@@ -1,46 +1,49 @@
-# Astro Starter Kit: Basics
+# fffg 个人网站
 
-```sh
-npm create astro@latest -- --template basics
+基于 Astro + Tailwind CSS 构建的个人网站，部署于 GitHub Pages。
+
+## 技术栈
+
+- **框架**: [Astro](https://astro.build)
+- **样式**: [Tailwind CSS](https://tailwindcss.com)
+- **部署**: [GitHub Pages](https://pages.github.com)
+- **CI/CD**: [GitHub Actions](https://github.com/features/actions)
+
+## 项目结构
+
+```
+src/
+├── components/       # UI 组件
+│   ├── Hero.astro
+│   ├── FeaturedProjects.astro
+│   ├── FeaturedPosts.astro
+│   └── Contact.astro
+├── layouts/          # 布局模板
+│   └── Layout.astro
+├── pages/            # 页面路由
+│   ├── index.astro   # 首页
+│   ├── blog.astro    # 文章列表
+│   └── projects.astro # 项目页
+└── styles/
+    └── global.css    # 全局样式
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 本地开发
 
-## 🚀 Project Structure
+```bash
+# 安装依赖
+npm install
 
-Inside of your Astro project, you'll see the following folders and files:
+# 启动开发服务器
+npm run dev
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+# 构建生产版本
+npm run build
+
+# 预览构建结果
+npm run preview
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## 部署
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+推送至 `main` 分支将自动触发 GitHub Actions 构建并部署到 GitHub Pages。

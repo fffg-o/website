@@ -1,0 +1,65 @@
+---
+export interface Project {
+  title: string;
+  description: string;
+  tags: string[];
+  link?: string;
+}
+
+const projects: Project[] = [
+  {
+    title: 'Astro Blog',
+    description: '基于 Astro 构建的个人博客系统，支持 Markdown 内容管理，自动部署到 GitHub Pages。',
+    tags: ['Astro', 'Tailwind CSS', 'TypeScript'],
+  },
+  {
+    title: 'CLI Tools',
+    description: '一套实用的命令行工具集，包含文件管理、代码生成、自动化脚本等功能。',
+    tags: ['Rust', 'Node.js', 'CLI'],
+  },
+  {
+    title: 'React Component Library',
+    description: '轻量级 React 组件库，提供常用的 UI 组件，支持按需加载和主题定制。',
+    tags: ['React', 'TypeScript', 'Storybook'],
+  },
+];
+---
+
+<section class="mb-16">
+  <h2 class="mb-6 text-2xl font-bold text-text">精选项目</h2>
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      projects.map((project) => (
+        <article class="group rounded-xl border border-border bg-white p-6 transition-all hover:border-primary/30 hover:shadow-md">
+          <h3 class="mb-2 text-lg font-semibold text-text">
+            {project.link ? (
+              <a href={project.link} class="after:absolute after:inset-0">
+                {project.title}
+              </a>
+            ) : (
+              project.title
+            )}
+          </h3>
+          <p class="mb-4 text-sm leading-relaxed text-text-muted">
+            {project.description}
+          </p>
+          <div class="flex flex-wrap gap-2">
+            {project.tags.map((tag) => (
+              <span class="rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-text-muted">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </article>
+      ))
+    }
+  </div>
+  <div class="mt-6 text-center">
+    <a
+      href="/projects"
+      class="text-sm font-medium text-primary transition-colors hover:text-primary-dark"
+    >
+      查看全部项目 &rarr;
+    </a>
+  </div>
+</section>

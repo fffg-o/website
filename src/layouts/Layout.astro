@@ -1,23 +1,62 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+---
+import '../styles/global.css';
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description ?? '个人网站'} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-surface text-text antialiased">
+    <!-- 导航栏 -->
+    <header class="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md">
+      <nav class="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
+        <a href="/" class="text-lg font-bold tracking-tight text-text transition-colors hover:text-primary">
+          fffg
+        </a>
+        <ul class="flex items-center gap-6">
+          <li>
+            <a href="/" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+              首页
+            </a>
+          </li>
+          <li>
+            <a href="/blog" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+              文章
+            </a>
+          </li>
+          <li>
+            <a href="/projects" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+              项目
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- 主内容 -->
+    <main class="mx-auto max-w-4xl px-4 py-12">
+      <slot />
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="border-t border-border py-8">
+      <div class="mx-auto max-w-4xl px-4 text-center text-sm text-text-muted">
+        <p>&copy; {new Date().getFullYear()} fffg. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>
