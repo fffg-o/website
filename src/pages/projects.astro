@@ -1,45 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
 
-export interface Project {
-  title: string;
-  description: string;
-  tags: string[];
-  link?: string;
-}
-
-const projects: Project[] = [
-  {
-    title: 'Astro Blog',
-    description: '基于 Astro 构建的个人博客系统，支持 Markdown 内容管理，自动部署到 GitHub Pages。',
-    tags: ['Astro', 'Tailwind CSS', 'TypeScript'],
-  },
-  {
-    title: 'CLI Tools',
-    description: '一套实用的命令行工具集，包含文件管理、代码生成、自动化脚本等功能。',
-    tags: ['Rust', 'Node.js', 'CLI'],
-  },
-  {
-    title: 'React Component Library',
-    description: '轻量级 React 组件库，提供常用的 UI 组件，支持按需加载和主题定制。',
-    tags: ['React', 'TypeScript', 'Storybook'],
-  },
-  {
-    title: 'API Gateway',
-    description: '高性能 API 网关，支持路由转发、限流、鉴权、日志记录等特性。',
-    tags: ['Go', 'gRPC', 'Redis'],
-  },
-  {
-    title: 'DevOps Toolkit',
-    description: 'DevOps 工具集，包含 Docker 镜像管理、Kubernetes 部署脚本、监控告警配置。',
-    tags: ['Docker', 'Kubernetes', 'Prometheus'],
-  },
-  {
-    title: 'Markdown Editor',
-    description: '在线 Markdown 编辑器，支持实时预览、语法高亮、图片拖拽上传。',
-    tags: ['Vue.js', 'CodeMirror', 'Node.js'],
-  },
-];
+const projects = await getCollection('projects');
 ---
 
 <Layout title="项目 - fffg" description="开源项目与作品">
@@ -50,19 +13,19 @@ const projects: Project[] = [
         projects.map((project) => (
           <article class="group rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
             <h2 class="mb-2 text-lg font-semibold text-text">
-              {project.link ? (
-                <a href={project.link} class="after:absolute after:inset-0">
-                  {project.title}
+              {project.data.link ? (
+                <a href={project.data.link} class="after:absolute after:inset-0">
+                  {project.data.title}
                 </a>
               ) : (
-                project.title
+                project.data.title
               )}
             </h2>
             <p class="mb-4 text-sm leading-relaxed text-text-muted">
-              {project.description}
+              {project.data.description}
             </p>
             <div class="flex flex-wrap gap-2">
-              {project.tags.map((tag) => (
+              {project.data.tags.map((tag: string) => (
                 <span class="rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-text-muted">
                   {tag}
                 </span>

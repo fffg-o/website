@@ -1,47 +1,25 @@
 ---
-export interface Post {
-  title: string;
-  description: string;
-  date: string;
-  slug: string;
-}
+import { getCollection } from 'astro:content';
 
-const posts: Post[] = [
-  {
-    title: '使用 Astro 构建现代静态网站',
-    description: 'Astro 是一个全新的静态站点生成器，本文将介绍如何使用 Astro 构建高性能的静态网站。',
-    date: '2026-04-20',
-    slug: 'building-with-astro',
-  },
-  {
-    title: 'Tailwind CSS v4 新特性一览',
-    description: 'Tailwind CSS v4 带来了全新的引擎和 API，让我们一起来看看有哪些值得关注的变化。',
-    date: '2026-04-15',
-    slug: 'tailwind-v4-features',
-  },
-  {
-    title: '从零开始搭建 GitHub Actions CI/CD',
-    description: '本文将手把手教你如何为项目配置 GitHub Actions，实现自动化测试和部署。',
-    date: '2026-04-10',
-    slug: 'github-actions-guide',
-  },
-];
+const posts = await getCollection('blog');
+// 取最新的3篇文章
+const latestPosts = posts.sort((a, b) => b.data.date.localeCompare(a.data.date)).slice(0, 3);
 ---
 
 <section class="mb-16">
   <h2 class="mb-6 text-2xl font-bold text-text">最新文章</h2>
   <div class="space-y-6">
     {
-      posts.map((post) => (
+      latestPosts.map((post) => (
         <article class="group relative rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
-          <time class="mb-2 block text-xs text-text-muted">{post.date}</time>
+          <time class="mb-2 block text-xs text-text-muted">{post.data.date}</time>
           <h3 class="mb-2 text-lg font-semibold text-text">
-            <a href={`/blog/${post.slug}`} class="after:absolute after:inset-0">
-              {post.title}
+            <a href={`/blog/${post.id.replace(/\.md$/, '')}`} class="after:absolute after:inset-0">
+              {post.data.title}
             </a>
           </h3>
           <p class="text-sm leading-relaxed text-text-muted">
-            {post.description}
+            {post.data.description}
           </p>
         </article>
       ))
