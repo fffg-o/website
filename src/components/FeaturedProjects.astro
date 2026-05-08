@@ -14,7 +14,7 @@ const featuredProjects = projects.slice(0, 3);
         <article class="group rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
           <h3 class="mb-2 text-lg font-semibold text-text">
             {project.data.link ? (
-              <a href={project.data.link} class="after:absolute after:inset-0">
+              <a href={project.data.link} class="text-primary hover:underline">
                 {project.data.title}
               </a>
             ) : (

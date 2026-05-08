@@ -1,0 +1,42 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="404 - 页面未找到 | fffg" description="抱歉，您访问的页面不存在">
+  <div class="flex flex-col items-center justify-center py-24">
+    <!-- 404 大号文字 -->
+    <h1 class="text-9xl font-bold tracking-tight text-primary">404</h1>
+
+    <!-- 分隔线 -->
+    <div class="my-6 h-px w-16 bg-border" />
+
+    <!-- 提示信息 -->
+    <p class="mb-2 text-xl font-medium text-text">
+      页面未找到
+    </p>
+    <p class="mb-8 text-sm text-text-muted">
+      抱歉，您访问的页面不存在或已被移除
+    </p>
+
+    <!-- 返回首页按钮 -->
+    <a
+      href="/"
+      class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition-all hover:bg-primary/90 hover:shadow-lg"
+    >
+      <!-- 返回图标 -->
+      <svg
+        class="size-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M19 12H5" />
+        <polyline points="12 19 5 12 12 5" />
+      </svg>
+      返回首页
+    </a>
+  </div>
+</Layout>
