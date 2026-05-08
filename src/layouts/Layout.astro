@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Search from '../components/Search.astro';
 
 export interface Props {
   title: string;
@@ -36,7 +37,7 @@ const { title, description } = Astro.props;
         <a href="/" class="text-lg font-bold tracking-tight text-text transition-colors hover:text-primary">
           fffg
         </a>
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4">
           <ul class="flex items-center gap-6">
             <li>
               <a href="/" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
@@ -55,6 +56,9 @@ const { title, description } = Astro.props;
             </li>
           </ul>
 
+          <!-- 搜索按钮 -->
+          <Search />
+
           <!-- 暗色模式切换按钮 -->
           <button
             id="theme-toggle"
@@ -72,7 +76,6 @@ const { title, description } = Astro.props;
               <line x1="1" y1="12" x2="3" y2="12"/>
               <line x1="21" y1="12" x2="23" y2="12"/>
               <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
             </svg>
             <!-- 月亮图标（暗色模式） -->
             <svg id="moon-icon" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

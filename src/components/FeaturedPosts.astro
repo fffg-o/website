@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import ReadingTime from './ReadingTime.astro';
 
 const posts = await getCollection('blog');
 // 取最新的3篇文章
@@ -12,7 +13,11 @@ const latestPosts = posts.sort((a, b) => b.data.date.localeCompare(a.data.date))
     {
       latestPosts.map((post) => (
         <article class="group relative rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
-          <time class="mb-2 block text-xs text-text-muted">{post.data.date}</time>
+          <div class="mb-2 flex flex-wrap items-center gap-2">
+            <time class="text-xs text-text-muted">{post.data.date}</time>
+            <span class="text-text-muted">·</span>
+            <ReadingTime content={post.body} />
+          </div>
           <h3 class="mb-2 text-lg font-semibold text-text">
             <a href={`/blog/${post.id.replace(/\.md$/, '')}`} class="after:absolute after:inset-0">
               {post.data.title}

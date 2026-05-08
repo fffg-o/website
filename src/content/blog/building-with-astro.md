@@ -2,6 +2,8 @@
 title: '使用 Astro 构建现代静态网站'
 description: 'Astro 是一个全新的静态站点生成器，本文将介绍如何使用 Astro 构建高性能的静态网站。'
 date: '2026-04-20'
+tags: ['Astro', '前端', 'SSG']
+series: 'Astro 入门'
 ---
 
 Astro 是一个全新的静态站点生成器，它将带来全新的开发体验和极致的性能表现。

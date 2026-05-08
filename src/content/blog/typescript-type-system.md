@@ -2,6 +2,8 @@
 title: '深入理解 TypeScript 类型系统'
 description: 'TypeScript 的类型系统非常强大，本文将深入探讨一些高级类型技巧和最佳实践。'
 date: '2026-04-05'
+tags: ['TypeScript', '前端', '类型系统']
+series: 'TypeScript 进阶'
 ---
 
 TypeScript 的类型系统是图灵完备的，这意味着你可以用类型表达极其复杂的逻辑。

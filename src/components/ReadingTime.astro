@@ -1,0 +1,47 @@
+---
+export interface Props {
+  content: string | undefined;
+  className?: string;
+}
+
+const { content = '', className = '' } = Astro.props;
+
+/**
+ * 估算阅读时间
+ * 中文：约 300 字/分钟
+ * 英文：约 200 词/分钟
+ * 混合内容取加权值
+ */
+function estimateReadingTime(text: string): number {
+  // 去除 frontmatter
+  const body = text.replace(/^---[\s\S]*?---\n*/m, '');
+  // 去除 markdown 标记
+  const cleanText = body
+    .replace(/```[\s\S]*?```/g, '')  // 去除代码块
+    .replace(/`[^`]+`/g, '')          // 去除行内代码
+    .replace(/[#*_~>`\-|\[\]()!]/g, '') // 去除 markdown 符号
+    .replace(/\s+/g, ' ');
+
+  // 统计中文字符
+  const cjkChars = (cleanText.match(/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/g) || []).length;
+  // 统计英文单词
+  const englishWords = (cleanText.match(/[a-zA-Z]+/g) || []).length;
+
+  // 计算阅读时间（分钟）
+  const cjkMinutes = cjkChars / 300;
+  const englishMinutes = englishWords / 200;
+
+  const totalMinutes = Math.ceil(cjkMinutes + englishMinutes);
+  return Math.max(1, totalMinutes);
+}
+
+const minutes = estimateReadingTime(content);
+---
+
+<span class={`inline-flex items-center gap-1 text-xs text-text-muted ${className}`}>
+  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <polyline points="12 6 12 12 16 14"/>
+  </svg>
+  {minutes === 1 ? '1 分钟' : `${minutes} 分钟`}
+</span>

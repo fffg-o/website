@@ -41,3 +41,306 @@ body {
   background-color: var(--color-primary);
   color: white;
 }
+
+/* ========================================
+   代码高亮增强
+   ======================================== */
+
+/* 代码块容器 - 添加圆角和阴影 */
+.prose pre {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+  background: #0d1117 !important;
+}
+
+/* 代码块标题 (rehype-code-title) */
+.remark-code-title {
+  margin-top: 1.25em;
+  margin-bottom: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  background: #161b22;
+  color: #8b949e;
+  border: 1px solid #30363d;
+  border-bottom: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.remark-code-title + pre {
+  margin-top: 0;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* 代码块滚动条 */
+.prose pre::-webkit-scrollbar {
+  height: 6px;
+}
+.prose pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+.prose pre::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+/* Shiki 行高亮标记 */
+.prose .line {
+  display: inline-block;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+/* 高亮行 - 使用 // [!code highlight] 标记 */
+.prose .line.highlight {
+  background: rgba(88, 166, 255, 0.1);
+  border-left: 3px solid #58a6ff;
+}
+
+/* 聚焦行 - 使用 // [!code focus] 标记 */
+.prose .line.focus {
+  background: rgba(255, 197, 23, 0.08);
+  border-left: 3px solid #ffc517;
+}
+
+/* 差异行 - 使用 // [!code ++] 和 // [!code --] 标记 */
+.prose .line.diff.add {
+  background: rgba(63, 185, 80, 0.1);
+  border-left: 3px solid #3fb950;
+}
+.prose .line.diff.add::before {
+  content: '+';
+  position: absolute;
+  left: 0.5rem;
+  color: #3fb950;
+}
+
+.prose .line.diff.remove {
+  background: rgba(248, 81, 73, 0.1);
+  border-left: 3px solid #f85149;
+}
+.prose .line.diff.remove::before {
+  content: '-';
+  position: absolute;
+  left: 0.5rem;
+  color: #f85149;
+}
+
+/* 代码块行号 */
+.prose pre.shiki {
+  counter-reset: line-number;
+}
+
+/* 代码复制按钮容器 */
+.code-block-wrapper {
+  position: relative;
+}
+
+.code-copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #30363d;
+  border-radius: 0.375rem;
+  background: #161b22;
+  color: #8b949e;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.code-block-wrapper:hover .code-copy-button {
+  opacity: 1;
+}
+
+.code-copy-button:hover {
+  background: #21262d;
+  color: #c9d1d9;
+}
+
+.code-copy-button.copied {
+  color: #3fb950;
+  border-color: #3fb950;
+}
+
+/* 代码块内部行内代码 */
+.prose code {
+  font-size: 0.85em;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+}
+
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-weight: 400;
+  font-size: 0.875em;
+  line-height: 1.6;
+}
+
+/* ========================================
+   标题锚点链接样式
+   ======================================== */
+.heading-anchor {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.heading-anchor:hover {
+  opacity: 0.75;
+}
+
+.prose h2 .heading-anchor,
+.prose h3 .heading-anchor {
+  margin-left: 0.25rem;
+  font-size: 0.75em;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.prose h2:hover .heading-anchor,
+.prose h3:hover .heading-anchor {
+  opacity: 0.5;
+}
+
+.prose h2 .heading-anchor:hover,
+.prose h3 .heading-anchor:hover {
+  opacity: 1;
+}
+
+/* ========================================
+   TOC 侧边栏与文章布局
+   ======================================== */
+@media (min-width: 1024px) {
+  .blog-layout {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .blog-content {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .blog-sidebar {
+    width: 14rem;
+    flex-shrink: 0;
+  }
+}
+
+/* ========================================
+   文章内容 Typography 增强
+   ======================================== */
+.prose {
+  max-width: none;
+}
+
+.prose h2 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  scroll-margin-top: 5rem;
+}
+
+.prose h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.4em;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text);
+  scroll-margin-top: 5rem;
+}
+
+.prose p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  line-height: 1.75;
+  color: var(--color-text);
+}
+
+.prose a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.prose a:hover {
+  opacity: 0.75;
+}
+
+.prose ul,
+.prose ol {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  padding-left: 1.5em;
+  color: var(--color-text);
+}
+
+.prose li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+  line-height: 1.7;
+}
+
+.prose blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: var(--color-text-muted);
+}
+
+.prose hr {
+  margin: 2em 0;
+  border-color: var(--color-border);
+}
+
+.prose img {
+  border-radius: 0.75rem;
+  margin: 1.5em auto;
+}
+
+.prose table {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+}
+
+.prose th,
+.prose td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.prose th {
+  background: var(--color-card);
+  font-weight: 600;
+}
+
+/* ========================================
+   页面过渡动画
+   ======================================== */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+article {
+  animation: fade-in 0.3s ease-out;
+}
