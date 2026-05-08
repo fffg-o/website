@@ -7,8 +7,8 @@ const posts = await getCollection('blog');
 const latestPosts = posts.sort((a, b) => b.data.date.localeCompare(a.data.date)).slice(0, 3);
 ---
 
-<section class="mb-16">
-  <h2 class="mb-6 text-2xl font-bold text-text">最新文章</h2>
+<section class="mb-12 sm:mb-16">
+  <h2 class="mb-4 text-xl font-bold text-text sm:mb-6 sm:text-2xl">最新文章</h2>
   <div class="space-y-6">
     {
       latestPosts.map((post) => (

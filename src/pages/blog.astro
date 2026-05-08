@@ -10,7 +10,7 @@ const sortedPosts = posts.sort((a, b) => b.data.date.localeCompare(a.data.date))
 
 <Layout title="文章 - fffg" description="技术文章与分享">
   <section>
-    <h1 class="mb-8 text-3xl font-bold text-text">文章</h1>
+    <h1 class="mb-6 text-2xl font-bold text-text sm:mb-8 sm:text-3xl">文章</h1>
     <div class="space-y-6">
       {
         sortedPosts.map((post) => (

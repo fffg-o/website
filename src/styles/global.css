@@ -35,11 +35,54 @@ body {
   color: var(--color-text);
   background-color: var(--color-surface);
   transition: background-color 0.3s ease, color 0.3s ease;
+  /* 防止移动端菜单打开时背景滚动 */
+  overflow-x: hidden;
+}
+
+body.menu-open {
+  overflow: hidden;
 }
 
 ::selection {
   background-color: var(--color-primary);
   color: white;
+}
+
+/* ========================================
+   移动端导航菜单
+   ======================================== */
+
+.mobile-menu {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  animation: slide-down 0.2s ease-out;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-nav-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: background-color 0.15s;
+}
+
+.mobile-nav-link:hover {
+  background: var(--color-border);
+  color: var(--color-primary);
 }
 
 /* ========================================
@@ -50,10 +93,37 @@ body {
 .prose pre {
   position: relative;
   border-radius: 0.75rem;
-  overflow: hidden;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
   margin-top: 1.25em;
   margin-bottom: 1.25em;
   background: #0d1117 !important;
+}
+
+/* 移动端代码块优化 - 更紧凑的间距 */
+@media (max-width: 639px) {
+  .prose pre {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+    font-size: 0.8125em;
+  }
+
+  .remark-code-title {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .remark-code-title + pre {
+    border-radius: 0;
+  }
+
+  .prose .line {
+    padding: 0 0.75rem;
+  }
 }
 
 /* 代码块标题 (rehype-code-title) */
@@ -331,6 +401,105 @@ body {
 .prose th {
   background: var(--color-card);
   font-weight: 600;
+}
+
+/* ========================================
+   移动端响应式优化
+   ======================================== */
+
+/* 搜索弹窗移动端适配 */
+@media (max-width: 639px) {
+  .search-overlay {
+    padding: 0 !important;
+    align-items: stretch !important;
+  }
+
+  .search-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .search-modal-header {
+    padding: 0.75rem 1rem;
+  }
+
+  #search-ui {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* 文章内容移动端适配 */
+@media (max-width: 639px) {
+  .prose {
+    font-size: 0.9375rem;
+  }
+
+  .prose h2 {
+    font-size: 1.25rem;
+    margin-top: 1.5em;
+  }
+
+  .prose h3 {
+    font-size: 1.0625rem;
+    margin-top: 1.25em;
+  }
+
+  .prose blockquote {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+    padding: 0.5em 0.75em;
+  }
+
+  .prose img {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    max-width: calc(100% + 2rem);
+    border-radius: 0;
+  }
+
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.8125rem;
+  }
+
+  .prose th,
+  .prose td {
+    padding: 0.375rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* 博客文章标签行 */
+  .blog-tags {
+    flex-wrap: wrap;
+  }
+}
+
+/* 系列导航移动端适配 */
+@media (max-width: 639px) {
+  .series-prev-next {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .series-next {
+    justify-content: flex-start;
+  }
+
+  .series-next-link {
+    text-align: left;
+  }
+}
+
+/* 404 页面移动端适配 */
+@media (max-width: 639px) {
+  .not-found-title {
+    font-size: 6rem;
+  }
 }
 
 /* ========================================

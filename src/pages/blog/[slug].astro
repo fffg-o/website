@@ -23,11 +23,11 @@ const { Content } = await render(entry);
     <TOC />
   </div>
 
-  <div class="flex gap-8 lg:gap-12">
+  <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
     <!-- 文章主体 -->
     <article class="prose prose-zinc min-w-0 flex-1 dark:prose-invert">
-      <header class="mb-8 not-prose">
-        <h1 class="mb-3 text-3xl font-bold text-text">{entry.data.title}</h1>
+      <header class="mb-6 not-prose sm:mb-8">
+        <h1 class="mb-3 text-2xl font-bold text-text sm:text-3xl">{entry.data.title}</h1>
         <div class="flex flex-wrap items-center gap-3">
           <time class="text-sm text-text-muted">{entry.data.date}</time>
           <span class="text-text-muted">·</span>
