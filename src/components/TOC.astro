@@ -37,6 +37,7 @@
   }
 
   class TableOfContents {
+    private container: HTMLElement;
     private listEl: HTMLElement;
     private navEl: HTMLElement;
     private toggleBtn: HTMLElement;
@@ -44,10 +45,11 @@
     private observer: IntersectionObserver | null = null;
     private activeId: string = '';
 
-    constructor() {
-      this.listEl = document.getElementById('toc-list')!;
-      this.navEl = document.getElementById('toc-nav')!;
-      this.toggleBtn = document.getElementById('toc-toggle')!;
+    constructor(container: HTMLElement) {
+      this.container = container;
+      this.listEl = container.querySelector('#toc-list')!;
+      this.navEl = container.querySelector('#toc-nav')!;
+      this.toggleBtn = container.querySelector('#toc-toggle')!;
 
       this.init();
     }
@@ -181,11 +183,17 @@
     }
   }
 
-  // DOM 加载完成后初始化
+  // DOM 加载完成后为每个 TOC 容器分别初始化
+  function initAllTOC() {
+    document.querySelectorAll('.toc-container').forEach((container) => {
+      new TableOfContents(container as HTMLElement);
+    });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new TableOfContents());
+    document.addEventListener('DOMContentLoaded', initAllTOC);
   } else {
-    new TableOfContents();
+    initAllTOC();
   }
 </script>
 

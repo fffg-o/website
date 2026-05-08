@@ -10,29 +10,47 @@ const projects = await getCollection('projects');
     <h1 class="mb-8 text-3xl font-bold text-text">项目</h1>
     <div class="grid gap-6 sm:grid-cols-2">
       {
-        projects.map((project) => (
-          <article class="group rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
-            <h2 class="mb-2 text-lg font-semibold text-text">
-              {project.data.link ? (
-                <a href={project.data.link} class="after:absolute after:inset-0">
-                  {project.data.title}
-                </a>
-              ) : (
-                project.data.title
-              )}
-            </h2>
-            <p class="mb-4 text-sm leading-relaxed text-text-muted">
-              {project.data.description}
-            </p>
-            <div class="flex flex-wrap gap-2">
-              {project.data.tags.map((tag: string) => (
-                <span class="rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-text-muted">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </article>
-        ))
+        projects.map((project) => {
+          const externalLink = project.data.link;
+          return (
+            <article class="group relative rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
+              <h2 class="mb-2 text-lg font-semibold text-text">
+                {externalLink ? (
+                  <a href={externalLink} target="_blank" rel="noopener noreferrer" class="after:absolute after:inset-0">
+                    {project.data.title}
+                  </a>
+                ) : (
+                  project.data.title
+                )}
+              </h2>
+              <p class="mb-4 text-sm leading-relaxed text-text-muted">
+                {project.data.description}
+              </p>
+              <div class="flex flex-wrap items-center gap-2">
+                {project.data.tags.map((tag: string) => (
+                  <span class="rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-text-muted">
+                    {tag}
+                  </span>
+                ))}
+                {externalLink && (
+                  <a
+                    href={externalLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="relative z-10 ml-auto inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                  >
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    <span>访问项目</span>
+                  </a>
+                )}
+              </div>
+            </article>
+          );
+        })
       }
     </div>
   </section>
