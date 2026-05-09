@@ -1,0 +1,155 @@
+<!-- 回到顶部 / 到底部按钮 -->
+<div id="scroll-buttons" class="scroll-buttons">
+  <button id="scroll-top" class="scroll-btn" aria-label="回到顶部" title="回到顶部">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"/>
+    </svg>
+  </button>
+  <button id="scroll-bottom" class="scroll-btn" aria-label="跳到底部" title="跳到底部">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </button>
+</div>
+
+<style>
+  .scroll-buttons {
+    position: fixed;
+    bottom: 2rem;
+    right: 1.5rem;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .scroll-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: var(--color-card);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: color-mix(in srgb, var(--color-card) 85%, transparent);
+  }
+
+  .scroll-btn.visible {
+    opacity: 0.7;
+    transform: translateY(0);
+  }
+
+  .scroll-btn:hover {
+    opacity: 1 !important;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+  }
+
+  .scroll-btn:active {
+    transform: translateY(1px) scale(0.95);
+  }
+
+  .dark .scroll-btn {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: color-mix(in srgb, var(--color-card) 85%, transparent);
+  }
+
+  /* 电脑端：按钮左边缘对齐主容器右边缘 */
+  @media (min-width: 1024px) {
+    .scroll-buttons {
+      right: calc((100vw - 1024px) / 2 + 2.5rem);
+    }
+  }
+
+  /* 移动端：按钮固定在屏幕右下角 */
+  @media (max-width: 639px) {
+    .scroll-buttons {
+      bottom: 1.25rem;
+      right: 1rem;
+    }
+
+    .scroll-btn {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.625rem;
+    }
+
+    .scroll-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+</style>
+
+<script>
+  const topBtn = document.getElementById('scroll-top');
+  const bottomBtn = document.getElementById('scroll-bottom');
+
+  function updateButtons() {
+    const scrollTop = window.scrollY;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+    const isPageShort = scrollHeight <= clientHeight;
+
+    if (isPageShort) {
+      topBtn?.classList.remove('visible');
+      bottomBtn?.classList.remove('visible');
+      return;
+    }
+
+    // 滚动过一定距离才显示回到顶部按钮
+    if (scrollTop > 300) {
+      topBtn?.classList.add('visible');
+    } else {
+      topBtn?.classList.remove('visible');
+    }
+
+    // 不在底部时显示跳到底部按钮
+    if (!atBottom) {
+      bottomBtn?.classList.add('visible');
+    } else {
+      bottomBtn?.classList.remove('visible');
+    }
+  }
+
+  // 节流函数，减少滚动事件触发频率
+  function throttle(fn: (...args: any[]) => void, delay: number) {
+    let lastCall = 0;
+    return function (this: any, ...args: any[]) {
+      const now = Date.now();
+      if (now - lastCall >= delay) {
+        lastCall = now;
+        fn.apply(this, args);
+      }
+    };
+  }
+
+  const throttledUpdate = throttle(updateButtons, 100);
+
+  window.addEventListener('scroll', throttledUpdate, { passive: true });
+  window.addEventListener('resize', updateButtons);
+
+  // 初始检查
+  updateButtons();
+
+  // 回到顶部
+  topBtn?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // 跳到底部
+  bottomBtn?.addEventListener('click', () => {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  });
+</script>

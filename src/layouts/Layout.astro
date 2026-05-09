@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Search from '../components/Search.astro';
+import ScrollButtons from '../components/ScrollButtons.astro';
 
 export interface Props {
   title: string;
@@ -175,6 +176,9 @@ const base = import.meta.env.BASE_URL;
         <p>&copy; {new Date().getFullYear()} <button id="footer-fffg" class="footer-fffg">fffg</button>. All rights reserved.</p>
       </div>
     </footer>
+
+    <!-- 回到顶部 / 跳到底部按钮 -->
+    <ScrollButtons />
   </body>
 </html>
 
