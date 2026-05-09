@@ -14,6 +14,21 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+
+// 获取所有随笔，按日期升序排列（从古至今）
+const allNotes = await getCollection('notes');
+const sortedNotes = allNotes.sort((a, b) => a.data.date.localeCompare(b.data.date));
+
+// 查找当前文章在排序后列表中的索引
+const currentIndex = sortedNotes.findIndex(
+  (note) => note.id === entry.id
+);
+
+// 获取上一篇（更早）和下一篇（更新）的文章
+const prevNote = currentIndex > 0 ? sortedNotes[currentIndex - 1] : null;
+const nextNote = currentIndex < sortedNotes.length - 1 ? sortedNotes[currentIndex + 1] : null;
+
+const base = import.meta.env.BASE_URL;
 ---
 
 <Layout title={`${entry.data.title} - fffg`} description={entry.data.description}>
@@ -48,4 +63,34 @@ const { Content } = await render(entry);
       <TOC />
     </aside>
   </div>
+
+  <!-- 上一篇 / 下一篇文章导航 -->
+  <nav class="note-prev-next not-prose" aria-label="随笔导航">
+    {
+      prevNote ? (
+        <a href={`${base}/note/${prevNote.id.replace(/\.md$/, '')}`} class="note-nav-link note-nav-prev">
+          <span class="note-nav-arrow">←</span>
+          <span class="note-nav-text">
+            <span class="note-nav-label">上一篇</span>
+            <span class="note-nav-title">{prevNote.data.title}</span>
+          </span>
+        </a>
+      ) : (
+        <div class="note-nav-placeholder"></div>
+      )
+    }
+    {
+      nextNote ? (
+        <a href={`${base}/note/${nextNote.id.replace(/\.md$/, '')}`} class="note-nav-link note-nav-next">
+          <span class="note-nav-text note-nav-text-right">
+            <span class="note-nav-label">下一篇</span>
+            <span class="note-nav-title">{nextNote.data.title}</span>
+          </span>
+          <span class="note-nav-arrow">→</span>
+        </a>
+      ) : (
+        <div class="note-nav-placeholder"></div>
+      )
+    }
+  </nav>
 </Layout>
