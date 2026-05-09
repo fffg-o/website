@@ -12,7 +12,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "create:post": "node scripts/create.mjs blog",
-    "create:note": "node scripts/create.mjs note"
+    "create:note": "node scripts/create.mjs note",
+    "normalize": "node scripts/normalize.mjs",
+    "normalize:all": "node scripts/normalize.mjs all"
   },
   "dependencies": {
     "@pagefind/default-ui": "^1.5.2",
