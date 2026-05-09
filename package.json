@@ -10,7 +10,9 @@
     "build": "astro build && npx pagefind --site dist",
     "build:search": "npx pagefind --site dist",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "create:post": "node scripts/create.mjs blog",
+    "create:note": "node scripts/create.mjs note"
   },
   "dependencies": {
     "@pagefind/default-ui": "^1.5.2",
