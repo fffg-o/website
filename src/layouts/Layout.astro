@@ -52,6 +52,11 @@ const base = import.meta.env.BASE_URL;
                 博客
               </a>
             </li>
+            <li id="nav-note" class="hidden">
+              <a href={`${base}/note`} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                随笔
+              </a>
+            </li>
             <li>
               <a href={`${base}/projects`} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
                 项目
@@ -144,6 +149,7 @@ const base = import.meta.env.BASE_URL;
         <nav class="drawer-nav">
           <a href={base} class="drawer-nav-link">首页</a>
           <a href={`${base}/blog`} class="drawer-nav-link">博客</a>
+          <a id="drawer-nav-note" href={`${base}/note`} class="drawer-nav-link hidden">随笔</a>
           <a href={`${base}/projects`} class="drawer-nav-link">项目</a>
         </nav>
 
@@ -166,7 +172,7 @@ const base = import.meta.env.BASE_URL;
     <!-- 页脚 -->
     <footer class="border-t border-border py-6 md:py-8">
       <div class="mx-auto max-w-4xl px-4 text-center text-sm text-text-muted">
-        <p>&copy; {new Date().getFullYear()} fffg. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} <button id="footer-fffg" class="cursor-pointer bg-transparent p-0 text-inherit hover:text-primary transition-colors">fffg</button>. All rights reserved.</p>
       </div>
     </footer>
   </body>
@@ -350,4 +356,30 @@ const base = import.meta.env.BASE_URL;
       closeDrawer();
     }
   });
+
+  // ===== 页脚彩蛋：点击 fffg 5 次显示随笔 =====
+  (function() {
+    const fffgBtn = document.getElementById('footer-fffg');
+    const navNote = document.getElementById('nav-note');
+    const drawerNavNote = document.getElementById('drawer-nav-note');
+    let clickCount = parseInt(localStorage.getItem('note-easter-egg') || '0', 10);
+
+    // 如果已解锁，直接显示
+    if (clickCount >= 5) {
+      navNote?.classList.remove('hidden');
+      drawerNavNote?.classList.remove('hidden');
+    }
+
+    if (fffgBtn) {
+      fffgBtn.addEventListener('click', () => {
+        clickCount++;
+        localStorage.setItem('note-easter-egg', String(clickCount));
+
+        if (clickCount >= 5) {
+          navNote?.classList.remove('hidden');
+          drawerNavNote?.classList.remove('hidden');
+        }
+      });
+    }
+  })();
 </script>
