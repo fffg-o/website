@@ -456,12 +456,17 @@ const base = import.meta.env.BASE_URL;
       }, 3000);
     }
 
-    // 如果已解锁，直接显示并加上 unlocked 样式
+    // 如果已解锁，直接显示
     if (clickCount >= 5) {
       navNote?.classList.remove('hidden');
-      navNote?.classList.add('nav-note-reveal');
       drawerNavNote?.classList.remove('hidden');
-      drawerNavNote?.classList.add('drawer-nav-note-reveal');
+      // 仅在首次解锁时播放动画，之后不再触发
+      const animShown = localStorage.getItem('note-animation-shown') === 'true';
+      if (!animShown) {
+        navNote?.classList.add('nav-note-reveal');
+        drawerNavNote?.classList.add('drawer-nav-note-reveal');
+        localStorage.setItem('note-animation-shown', 'true');
+      }
       updateBtnState(clickCount);
     } else {
       updateBtnState(clickCount);
@@ -485,6 +490,7 @@ const base = import.meta.env.BASE_URL;
         navNote?.classList.add('nav-note-reveal');
         drawerNavNote?.classList.remove('hidden');
         drawerNavNote?.classList.add('drawer-nav-note-reveal');
+        localStorage.setItem('note-animation-shown', 'true');
         createConfetti();
         showToast();
       }

@@ -946,6 +946,12 @@ article {
    页脚彩蛋 - 点击 fffg 触发随笔显示
    ======================================== */
 
+/* 修复 Tailwind hidden 被 .drawer-nav-link 覆盖的问题 */
+#drawer-nav-note.hidden,
+#nav-note.hidden {
+  display: none !important;
+}
+
 /* fffg 触发按钮 */
 .footer-fffg {
   position: relative;
