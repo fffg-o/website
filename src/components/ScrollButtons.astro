@@ -64,13 +64,6 @@
     background: color-mix(in srgb, var(--color-card) 85%, transparent);
   }
 
-  /* 电脑端：按钮左边缘对齐主容器右边缘 */
-  @media (min-width: 1024px) {
-    .scroll-buttons {
-      right: calc((100vw - 1024px) / 2 + 2.5rem);
-    }
-  }
-
   /* 移动端：按钮固定在屏幕右下角 */
   @media (max-width: 639px) {
     .scroll-buttons {
@@ -94,6 +87,27 @@
 <script>
   const topBtn = document.getElementById('scroll-top');
   const bottomBtn = document.getElementById('scroll-bottom');
+  const scrollContainer = document.getElementById('scroll-buttons');
+
+  // 桌面端：按钮左边缘紧贴文章主体右边缘
+  function updateBtnPosition() {
+    if (!scrollContainer) return;
+
+    const article = document.querySelector('.blog-article');
+    const isDesktop = window.innerWidth >= 1024;
+
+    if (article && isDesktop) {
+      const articleRect = article.getBoundingClientRect();
+      const btnWidth = scrollContainer.offsetWidth || 40;
+      // 计算 right 值：按钮左边缘 = 文章右边缘
+      // 按钮容器右边缘 = articleRight + btnWidth
+      // right = viewportWidth - 按钮容器右边缘
+      const right = window.innerWidth - articleRect.right - btnWidth -22;
+      scrollContainer.style.right = right + 'px';
+    } else {
+      scrollContainer.style.right = '';
+    }
+  }
 
   function updateButtons() {
     const scrollTop = window.scrollY;
@@ -108,14 +122,12 @@
       return;
     }
 
-    // 滚动过一定距离才显示回到顶部按钮
     if (scrollTop > 300) {
       topBtn?.classList.add('visible');
     } else {
       topBtn?.classList.remove('visible');
     }
 
-    // 不在底部时显示跳到底部按钮
     if (!atBottom) {
       bottomBtn?.classList.add('visible');
     } else {
@@ -123,7 +135,6 @@
     }
   }
 
-  // 节流函数，减少滚动事件触发频率
   function throttle(fn: (...args: any[]) => void, delay: number) {
     let lastCall = 0;
     return function (this: any, ...args: any[]) {
@@ -138,17 +149,19 @@
   const throttledUpdate = throttle(updateButtons, 100);
 
   window.addEventListener('scroll', throttledUpdate, { passive: true });
-  window.addEventListener('resize', updateButtons);
+  window.addEventListener('resize', () => {
+    updateButtons();
+    updateBtnPosition();
+  });
 
   // 初始检查
   updateButtons();
+  updateBtnPosition();
 
-  // 回到顶部
   topBtn?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  // 跳到底部
   bottomBtn?.addEventListener('click', () => {
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   });
