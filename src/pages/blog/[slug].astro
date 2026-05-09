@@ -18,14 +18,9 @@ const { Content } = await render(entry);
 ---
 
 <Layout title={`${entry.data.title} - fffg`} description={entry.data.description}>
-  <!-- 移动端 TOC （在文章上方） -->
-  <div class="mb-6 lg:hidden">
-    <TOC />
-  </div>
-
-  <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
+  <div class="blog-page">
     <!-- 文章主体 -->
-    <article class="prose prose-zinc min-w-0 flex-1 dark:prose-invert">
+    <article class="blog-article prose prose-zinc dark:prose-invert">
       <header class="mb-6 not-prose sm:mb-8">
         <h1 class="mb-3 text-2xl font-bold text-text sm:text-3xl">{entry.data.title}</h1>
         <div class="flex flex-wrap items-center gap-3">
@@ -50,7 +45,7 @@ const { Content } = await render(entry);
     </article>
 
     <!-- 桌面端 TOC 侧边栏 -->
-    <aside class="hidden w-56 shrink-0 lg:block xl:w-64">
+    <aside class="blog-toc-sidebar">
       <TOC />
     </aside>
   </div>

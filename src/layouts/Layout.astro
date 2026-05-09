@@ -48,7 +48,7 @@ const { title, description } = Astro.props;
             </li>
             <li>
               <a href="/blog" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
-                文章
+                博客
               </a>
             </li>
             <li>
@@ -128,21 +128,37 @@ const { title, description } = Astro.props;
           </button>
         </div>
       </nav>
-
-      <!-- 移动端下拉菜单 -->
-      <div id="mobile-menu" class="mobile-menu hidden">
-        <div class="mx-auto max-w-4xl px-4 py-4">
-          <nav class="flex flex-col gap-1">
-            <a href="/" class="mobile-nav-link">首页</a>
-            <a href="/blog" class="mobile-nav-link">文章</a>
-            <a href="/projects" class="mobile-nav-link">项目</a>
-          </nav>
-        </div>
-      </div>
     </header>
 
+    <!-- 移动端抽屉遮罩层 -->
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+
+    <!-- 移动端右侧滑入菜单 -->
+    <div id="mobile-drawer" class="mobile-drawer">
+      <div class="drawer-inner">
+        <!-- 网站标题 -->
+        <span class="drawer-site-title">fffg</span>
+
+        <!-- 导航菜单 -->
+        <nav class="drawer-nav">
+          <a href="/" class="drawer-nav-link">首页</a>
+          <a href="/blog" class="drawer-nav-link">博客</a>
+          <a href="/projects" class="drawer-nav-link">项目</a>
+        </nav>
+
+        <!-- 分隔线 -->
+        <div class="drawer-divider"></div>
+
+        <!-- 文章目录（仅博客文章页面由 TOC 组件激活显示） -->
+        <div id="drawer-toc" class="drawer-toc">
+          <h3 class="drawer-toc-title">目录</h3>
+          <div id="drawer-toc-content"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- 主内容 -->
-    <main class="mx-auto max-w-4xl px-4 py-8 md:py-12">
+    <main class="mx-auto max-w-5xl px-4 py-8 md:py-12">
       <slot />
     </main>
 
@@ -283,39 +299,54 @@ const { title, description } = Astro.props;
   initThemeToggle('theme-toggle', 'sun-icon', 'moon-icon');
   initThemeToggle('theme-toggle-mobile', 'sun-icon-mobile', 'moon-icon-mobile');
 
-  // ===== 移动端汉堡菜单 =====
+  // ===== 移动端右侧抽屉菜单 =====
   const menuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
+  const drawer = document.getElementById('mobile-drawer');
+  const overlay = document.getElementById('drawer-overlay');
   const menuIcon = document.getElementById('menu-icon');
   const closeIcon = document.getElementById('close-icon');
 
-  if (menuBtn && mobileMenu) {
+  function openDrawer() {
+    if (!drawer || !overlay) return;
+    drawer.classList.add('open');
+    overlay.classList.add('show');
+    menuIcon?.classList.add('hidden');
+    closeIcon?.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    if (!drawer || !overlay) return;
+    drawer.classList.remove('open');
+    overlay.classList.remove('show');
+    menuIcon?.classList.remove('hidden');
+    closeIcon?.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  if (menuBtn) {
     menuBtn.addEventListener('click', () => {
-      const isOpen = !mobileMenu.classList.contains('hidden');
-      mobileMenu.classList.toggle('hidden');
-      menuIcon?.classList.toggle('hidden');
-      closeIcon?.classList.toggle('hidden');
-      document.body.style.overflow = isOpen ? '' : 'hidden';
-    });
-
-    // 点击链接后关闭菜单
-    mobileMenu.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('click', () => {
-        mobileMenu.classList.add('hidden');
-        menuIcon?.classList.remove('hidden');
-        closeIcon?.classList.add('hidden');
-        document.body.style.overflow = '';
-      });
-    });
-
-    // 窗口变宽时自动关闭移动菜单
-    window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768) {
-        mobileMenu.classList.add('hidden');
-        menuIcon?.classList.remove('hidden');
-        closeIcon?.classList.add('hidden');
-        document.body.style.overflow = '';
+      const isOpen = drawer?.classList.contains('open');
+      if (isOpen) {
+        closeDrawer();
+      } else {
+        openDrawer();
       }
     });
   }
+
+  // 点击遮罩层关闭
+  overlay?.addEventListener('click', closeDrawer);
+
+  // 点击抽屉内导航链接后关闭
+  drawer?.querySelectorAll('.drawer-nav-link').forEach((link) => {
+    link.addEventListener('click', closeDrawer);
+  });
+
+  // 窗口变宽时自动关闭
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      closeDrawer();
+    }
+  });
 </script>

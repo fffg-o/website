@@ -20,6 +20,48 @@ Astro 的核心优势在于其创新的岛屿架构（Islands Architecture），
 npm create astro@latest
 ```
 
+```java
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
 ## 结语
 
 Astro 为静态网站生成带来了全新的思路，值得每个前端开发者尝试。
