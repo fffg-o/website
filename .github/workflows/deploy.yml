@@ -37,7 +37,7 @@ jobs:
         run: npm ci
         working-directory: ${{ env.BUILD_PATH }}
       - name: Build with Astro
-        run: npx astro build
+        run: npm run build
         working-directory: ${{ env.BUILD_PATH }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -8,6 +8,7 @@ export interface Props {
 
 const { post } = Astro.props;
 const seriesName = post.data.series;
+const base = import.meta.env.BASE_URL;
 
 // 构建系列列表数据（若无 series 字段则跳过）
 const allPosts = await getCollection('blog');
@@ -36,7 +37,7 @@ const nextPost = currentIndex < seriesPosts.length - 1 ? seriesPosts[currentInde
     <ul class="series-list">
       {seriesPosts.map((p, i) => (
         <li class={i === currentIndex ? 'series-item series-item-current' : 'series-item'}>
-          <a href={`/blog/${p.id.replace(/\.md$/, '')}`}>
+          <a href={`${base}/blog/${p.id.replace(/\.md$/, '')}`}>
             <span class="series-index">{i + 1}</span>
             <span>{p.data.title}</span>
           </a>
@@ -48,7 +49,7 @@ const nextPost = currentIndex < seriesPosts.length - 1 ? seriesPosts[currentInde
     <div class="series-prev-next">
       <div class="series-prev">
         {prevPost ? (
-          <a href={`/blog/${prevPost.id.replace(/\.md$/, '')}`} class="series-prev-link">
+          <a href={`${base}/blog/${prevPost.id.replace(/\.md$/, '')}`} class="series-prev-link">
             <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
@@ -61,7 +62,7 @@ const nextPost = currentIndex < seriesPosts.length - 1 ? seriesPosts[currentInde
       </div>
       <div class="series-next">
         {nextPost ? (
-          <a href={`/blog/${nextPost.id.replace(/\.md$/, '')}`} class="series-next-link">
+          <a href={`${base}/blog/${nextPost.id.replace(/\.md$/, '')}`} class="series-next-link">
             <div class="min-w-0 text-right">
               <span class="block text-xs text-text-muted">下一篇</span>
               <span class="block truncate text-sm font-medium">{nextPost.data.title}</span>

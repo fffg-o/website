@@ -15,8 +15,8 @@ import { remarkCustomContainer } from './src/plugins/remark-custom-container';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://fffg.github.io',
-  base: '',
+  site: 'https://fffg-o.github.io',
+  base: '/website',
   vite: {
     plugins: [tailwindcss()]
   },

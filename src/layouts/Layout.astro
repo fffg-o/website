@@ -8,6 +8,7 @@ export interface Props {
 }
 
 const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL;
 ---
 
 <!doctype html>
@@ -15,8 +16,8 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" href={`${base}/favicon.ico`} />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description ?? '个人网站'} />
     <title>{title}</title>
@@ -34,7 +35,7 @@ const { title, description } = Astro.props;
     <!-- 导航栏 -->
     <header class="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
       <nav class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 md:py-4">
-        <a href="/" class="text-lg font-bold tracking-tight text-text transition-colors hover:text-primary shrink-0">
+        <a href={base} class="text-lg font-bold tracking-tight text-text transition-colors hover:text-primary shrink-0">
           fffg
         </a>
 
@@ -42,17 +43,17 @@ const { title, description } = Astro.props;
         <div class="hidden md:flex md:items-center md:gap-4">
           <ul class="flex items-center gap-6">
             <li>
-              <a href="/" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+              <a href={base} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
                 首页
               </a>
             </li>
             <li>
-              <a href="/blog" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+              <a href={`${base}/blog`} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
                 博客
               </a>
             </li>
             <li>
-              <a href="/projects" class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+              <a href={`${base}/projects`} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
                 项目
               </a>
             </li>
@@ -141,9 +142,9 @@ const { title, description } = Astro.props;
 
         <!-- 导航菜单 -->
         <nav class="drawer-nav">
-          <a href="/" class="drawer-nav-link">首页</a>
-          <a href="/blog" class="drawer-nav-link">博客</a>
-          <a href="/projects" class="drawer-nav-link">项目</a>
+          <a href={base} class="drawer-nav-link">首页</a>
+          <a href={`${base}/blog`} class="drawer-nav-link">博客</a>
+          <a href={`${base}/projects`} class="drawer-nav-link">项目</a>
         </nav>
 
         <!-- 分隔线 -->

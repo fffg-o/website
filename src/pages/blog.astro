@@ -6,6 +6,7 @@ import { getCollection } from 'astro:content';
 const posts = await getCollection('blog');
 // 按日期降序排列
 const sortedPosts = posts.sort((a, b) => b.data.date.localeCompare(a.data.date));
+const base = import.meta.env.BASE_URL;
 ---
 
 <Layout title="博客 - fffg" description="技术文章与分享">
@@ -21,7 +22,7 @@ const sortedPosts = posts.sort((a, b) => b.data.date.localeCompare(a.data.date))
               <ReadingTime content={post.body} />
             </div>
             <h2 class="mb-2 text-xl font-semibold text-text">
-              <a href={`/blog/${post.id.replace(/\.md$/, '')}`} class="after:absolute after:inset-0">
+              <a href={`${base}/blog/${post.id.replace(/\.md$/, '')}`} class="after:absolute after:inset-0">
                 {post.data.title}
               </a>
             </h2>
