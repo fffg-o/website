@@ -22,6 +22,8 @@
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^6.1.9",
     "hast-util-from-html": "^2.0.3",
+    "hast-util-to-html": "^9.0.5",
+    "mdast-util-to-hast": "^13.2.1",
     "pagefind": "^1.5.2",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-code-title": "^1.0.0",
