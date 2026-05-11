@@ -23,7 +23,7 @@
   "dependencies": {
     "@pagefind/default-ui": "^1.5.2",
     "@shikijs/transformers": "^4.0.2",
-    "@tailwindcss/vite": "^4.2.4",
+    "@tailwindcss/postcss": "^4.2.4",
     "astro": "^6.1.9",
     "hast-util-from-html": "^2.0.3",
     "hast-util-to-html": "^9.0.5",

@@ -1,6 +1,5 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeCodeTitle from 'rehype-code-title';
 import remarkEmoji from 'remark-emoji';
@@ -17,9 +16,6 @@ import { remarkCustomContainer } from './src/plugins/remark-custom-container';
 export default defineConfig({
   site: 'https://fffg-o.github.io',
   base: '/website',
-  vite: {
-    plugins: [tailwindcss()]
-  },
   markdown: {
     syntaxHighlight: 'shiki',
     shikiConfig: {
