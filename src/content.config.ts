@@ -1,8 +1,8 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { encryptedContent } from './loaders/encrypted-content';
 
 const blog = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: 'src/content/blog' }),
+  loader: encryptedContent({ base: 'src/content/blog' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -13,7 +13,7 @@ const blog = defineCollection({
 });
 
 const notes = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: 'src/content/note' }),
+  loader: encryptedContent({ base: 'src/content/note' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -23,7 +23,7 @@ const notes = defineCollection({
 });
 
 const projects = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: 'src/content/projects' }),
+  loader: encryptedContent({ base: 'src/content/projects' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),

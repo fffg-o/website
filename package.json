@@ -14,7 +14,11 @@
     "create:post": "node scripts/create.mjs blog",
     "create:note": "node scripts/create.mjs note",
     "normalize": "node scripts/normalize.mjs",
-    "normalize:all": "node scripts/normalize.mjs all"
+    "normalize:all": "node scripts/normalize.mjs all",
+    "encrypt": "node scripts/encrypt.mjs",
+    "encrypt:dry": "node scripts/encrypt.mjs --dry",
+    "decrypt": "node scripts/encrypt.mjs --decrypt",
+    "decrypt:all": "node scripts/encrypt.mjs --decrypt"
   },
   "dependencies": {
     "@pagefind/default-ui": "^1.5.2",
@@ -31,5 +35,8 @@
     "remark-emoji": "^5.0.2",
     "tailwindcss": "^4.2.4",
     "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.2"
   }
 }

@@ -39,6 +39,8 @@ jobs:
       - name: Build with Astro
         run: npm run build
         working-directory: ${{ env.BUILD_PATH }}
+        env:
+          CONTENT_KEY: ${{ secrets.CONTENT_KEY }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

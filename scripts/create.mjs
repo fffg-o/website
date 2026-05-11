@@ -10,9 +10,13 @@
  *   # 或直接传参（非交互式）:
  *   node scripts/create.mjs blog "标题" -d "描述" -t "标签1,标签2"
  *   node scripts/create.mjs note "标题" -d "描述" -t "标签1,标签2" -s "系列名"
+ *
+ * 注意:
+ *   创建 .md 文件后会自动加密为 .md.enc（如果 CONTENT_KEY 环境变量已设置）
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { createCipheriv, randomBytes } from 'node:crypto';
 import { createInterface } from 'node:readline';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -129,6 +133,9 @@ async function createBlog(opts) {
 
   writeFileSync(filepath, content, 'utf-8');
   console.log(`✅ 博客已创建: ${filepath}`);
+
+  // 自动加密
+  tryEncrypt(filepath);
 }
 
 // ---------- create note ----------
@@ -185,6 +192,9 @@ async function createNote(opts) {
 
   writeFileSync(filepath, content, 'utf-8');
   console.log(`✅ 随笔已创建: ${filepath}`);
+
+  // 自动加密
+  tryEncrypt(filepath);
 }
 
 // ---------- CLI ----------
@@ -236,6 +246,45 @@ async function main() {
 `);
     process.exit(1);
   }
+}
+
+// ============================================================
+// 自动加密辅助
+// ============================================================
+
+const ALGORITHM = 'aes-256-gcm';
+const IV_LENGTH = 12;
+const TAG_LENGTH = 16;
+
+function tryEncrypt(mdPath) {
+  const keyHex = process.env.CONTENT_KEY;
+  if (!keyHex) {
+    // 没有 CONTENT_KEY 则跳过加密（开发环境正常运行）
+    return;
+  }
+
+  const normalized = keyHex.trim();
+  if (!/^[0-9a-fA-F]{64}$/.test(normalized)) {
+    console.warn('⚠️  CONTENT_KEY 格式无效，跳过自动加密');
+    return;
+  }
+
+  const key = Buffer.from(normalized, 'hex');
+  const plaintext = readFileSync(mdPath, 'utf-8');
+  const iv = randomBytes(IV_LENGTH);
+  const cipher = createCipheriv(ALGORITHM, key, iv);
+
+  const encrypted = Buffer.concat([
+    cipher.update(plaintext, 'utf-8'),
+    cipher.final(),
+  ]);
+
+  const tag = cipher.getAuthTag();
+  const result = Buffer.concat([iv, tag, encrypted]);
+
+  const encPath = mdPath + '.enc';
+  writeFileSync(encPath, result);
+  console.log(`🔒 已加密: ${encPath}`);
 }
 
 main().catch((e) => {
