@@ -1,0 +1,315 @@
+---
+interface TagInfo {
+  name: string;
+  count: number;
+}
+
+interface Props {
+  tags: TagInfo[];
+  maxTags?: number;
+}
+
+const { tags, maxTags = 30 } = Astro.props;
+// 按文章数量降序排列，取前 maxTags 个
+const sortedTags = tags
+  .sort((a, b) => b.count - a.count)
+  .slice(0, maxTags);
+---
+
+<div id="tag-filter" class="tag-filter">
+  <h3 class="tag-filter-title">分类</h3>
+  <div class="tag-filter-list">
+    <button
+      class="tag-filter-btn"
+      data-tag=""
+      aria-label="显示所有文章"
+    >
+      全部
+    </button>
+    {sortedTags.map((tag) => (
+      <button
+        class="tag-filter-btn"
+        data-tag={tag.name}
+        aria-label={`筛选标签：${tag.name}`}
+      >
+        {tag.name}
+        <span class="tag-filter-count">{tag.count}</span>
+      </button>
+    ))}
+  </div>
+</div>
+
+<style is:global>
+  /* ========================================
+     标签筛选器 — 极简风格 · 低对比度柔和配色
+     ======================================== */
+
+  /* ---- 桌面端：右侧悬浮面板 ---- */
+  .tag-filter {
+    position: fixed;
+    right: 1.5rem;
+    top: 6rem;
+    width: 200px;
+    max-height: calc(100vh - 9rem);
+    overflow-y: auto;
+    z-index: 20;
+    padding: 1rem 1rem 0.75rem;
+  }
+
+  .tag-filter::-webkit-scrollbar { width: 3px; }
+  .tag-filter::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 2px;
+  }
+
+  .tag-filter-title {
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    user-select: none;
+  }
+
+  .tag-filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  /* ---- 标签按钮 ---- */
+  .tag-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    border: 1px solid var(--tag-border);
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--tag-text);
+    font-size: 0.75rem;
+    font-family: inherit;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    user-select: none;
+    white-space: nowrap;
+    line-height: 1.5;
+  }
+
+  .tag-filter-btn:hover {
+    border-color: var(--tag-border-hover);
+    color: var(--tag-text-hover);
+  }
+
+  .tag-filter-btn.active {
+    background: var(--tag-bg-active);
+    border-color: var(--tag-border-active);
+    color: var(--tag-text-active);
+    font-weight: 450;
+  }
+
+  /* ---- 标签数量角标 ---- */
+  .tag-filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 450;
+    border-radius: 999px;
+    background: var(--tag-count-bg);
+    color: var(--tag-count-text);
+    line-height: 1;
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+
+  .tag-filter-btn.active .tag-filter-count {
+    background: var(--tag-count-bg-active);
+    color: var(--tag-count-text-active);
+  }
+
+  /* ========================================
+     亮色模式 — 低对比度柔和配色
+     ======================================== */
+  :root {
+    --tag-border: rgba(0, 0, 0, 0.08);
+    --tag-border-hover: rgba(59, 130, 246, 0.25);
+    --tag-border-active: rgba(59, 130, 246, 0.3);
+
+    --tag-text: rgba(0, 0, 0, 0.4);
+    --tag-text-hover: rgba(59, 130, 246, 0.7);
+    --tag-text-active: #ffffff;
+
+    --tag-bg-active: rgba(59, 130, 246, 0.12);
+
+    --tag-count-bg: rgba(0, 0, 0, 0.05);
+    --tag-count-text: rgba(0, 0, 0, 0.35);
+    --tag-count-bg-active: rgba(255, 255, 255, 0.2);
+    --tag-count-text-active: rgba(255, 255, 255, 0.85);
+  }
+
+  /* ========================================
+     暗色模式 — 低对比度柔和配色
+     ======================================== */
+  .dark {
+    --tag-border: rgba(255, 255, 255, 0.07);
+    --tag-border-hover: rgba(96, 165, 250, 0.2);
+    --tag-border-active: rgba(96, 165, 250, 0.25);
+
+    --tag-text: rgba(255, 255, 255, 0.35);
+    --tag-text-hover: rgba(96, 165, 250, 0.65);
+    --tag-text-active: rgba(255, 255, 255, 0.92);
+
+    --tag-bg-active: rgba(96, 165, 250, 0.12);
+
+    --tag-count-bg: rgba(255, 255, 255, 0.06);
+    --tag-count-text: rgba(255, 255, 255, 0.3);
+    --tag-count-bg-active: rgba(255, 255, 255, 0.12);
+    --tag-count-text-active: rgba(255, 255, 255, 0.7);
+  }
+
+  /* ========================================
+     桌面端断点微调
+     ======================================== */
+  @media (min-width: 1280px) {
+    .tag-filter { width: 220px; }
+  }
+
+  /* ========================================
+     平板及以下：页面内嵌水平标签云
+     ======================================== */
+  @media (max-width: 1023px) {
+    .tag-filter {
+      position: static;
+      width: 100%;
+      max-height: none;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      background: var(--color-card);
+    }
+
+    .tag-filter-title {
+      margin-bottom: 0.625rem;
+    }
+
+    .tag-filter-list {
+      gap: 0.375rem;
+    }
+
+    .tag-filter-btn {
+      padding: 0.25rem 0.625rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+    }
+
+    .tag-filter-count {
+      display: none;
+    }
+  }
+
+  /* ---- 文章隐藏状态 ---- */
+  .hidden-by-filter {
+    display: none !important;
+  }
+</style>
+
+<script>
+  class TagFilterController {
+    private activeTag: string = '';
+    private buttons: NodeListOf<HTMLButtonElement>;
+    private articles: HTMLElement[];
+    private container: HTMLElement;
+
+    constructor() {
+      this.container = document.getElementById('tag-filter')!;
+      this.buttons = this.container.querySelectorAll('.tag-filter-btn');
+      this.articles = Array.from(document.querySelectorAll('[data-tags]'));
+      this.init();
+    }
+
+    private init() {
+      const params = new URLSearchParams(window.location.search);
+      const tagParam = params.get('tag');
+      if (tagParam) {
+        this.activeTag = tagParam;
+      }
+
+      this.applyFilter();
+      this.bindEvents();
+
+      window.addEventListener('popstate', () => {
+        const params = new URLSearchParams(window.location.search);
+        this.activeTag = params.get('tag') || '';
+        this.applyFilter();
+      });
+    }
+
+    private bindEvents() {
+      this.buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const tag = btn.getAttribute('data-tag') || '';
+          this.activeTag = tag;
+          this.updateURL(tag);
+          this.applyFilter();
+        });
+      });
+    }
+
+    private updateURL(tag: string) {
+      const url = new URL(window.location.href);
+      if (tag) {
+        url.searchParams.set('tag', tag);
+      } else {
+        url.searchParams.delete('tag');
+      }
+      window.history.pushState({ tag }, '', url.toString());
+    }
+
+    private applyFilter() {
+      this.buttons.forEach((btn) => {
+        const btnTag = btn.getAttribute('data-tag') || '';
+        btn.classList.toggle('active', this.activeTag === btnTag);
+      });
+
+      if (!this.activeTag) {
+        this.articles.forEach((article) => {
+          article.classList.remove('hidden-by-filter');
+          article.style.animation = 'none';
+          requestAnimationFrame(() => { article.style.animation = ''; });
+        });
+        return;
+      }
+
+      const lowerTag = this.activeTag.toLowerCase();
+      this.articles.forEach((article) => {
+        const articleTags = article.getAttribute('data-tags') || '';
+        const tagList = articleTags.split(/\s+/).filter(Boolean);
+        const match = tagList.some((t) => t.toLowerCase() === lowerTag);
+
+        if (match) {
+          article.classList.remove('hidden-by-filter');
+          article.style.animation = 'none';
+          requestAnimationFrame(() => { article.style.animation = ''; });
+        } else {
+          article.classList.add('hidden-by-filter');
+        }
+      });
+    }
+  }
+
+  function initTagFilter() {
+    if (!document.getElementById('tag-filter')) return;
+    new TagFilterController();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTagFilter);
+  } else {
+    initTagFilter();
+  }
+</script>

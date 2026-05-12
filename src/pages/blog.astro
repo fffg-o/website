@@ -1,21 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ReadingTime from '../components/ReadingTime.astro';
+import TagFilter from '../components/TagFilter.astro';
 import { getCollection } from 'astro:content';
 
 const posts = await getCollection('blog');
 // 按日期降序排列
 const sortedPosts = posts.sort((a, b) => b.data.date.localeCompare(a.data.date));
 const base = import.meta.env.BASE_URL;
+
+// 收集所有标签及其文章数量
+const tagMap = new Map<string, number>();
+for (const post of posts) {
+  if (post.data.tags) {
+    for (const tag of post.data.tags) {
+      tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
+    }
+  }
+}
+const allTags = Array.from(tagMap.entries()).map(([name, count]) => ({ name, count }));
 ---
 
 <Layout title="博客 - fffg" description="技术文章与分享">
   <section>
     <h1 class="mb-6 text-2xl font-bold text-text sm:mb-8 sm:text-3xl">博客</h1>
+    <TagFilter tags={allTags} maxTags={30} />
     <div class="space-y-6">
       {
         sortedPosts.map((post) => (
-          <article class="group relative rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
+          <article
+            class="group relative rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md"
+            data-tags={(post.data.tags ?? []).join(' ')}
+          >
             <div class="mb-2 flex flex-wrap items-center gap-2">
               <time class="text-xs text-text-muted">{post.data.date}</time>
               <span class="text-text-muted">·</span>
