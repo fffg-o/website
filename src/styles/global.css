@@ -948,7 +948,9 @@ article {
 
 /* 修复 Tailwind hidden 被 .drawer-nav-link 覆盖的问题 */
 #drawer-nav-note.hidden,
-#nav-note.hidden {
+#nav-note.hidden,
+#drawer-nav-maze.hidden,
+#nav-maze.hidden {
   display: none !important;
 }
 

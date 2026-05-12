@@ -24,6 +24,10 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 
+// AES-256-GCM 加密常量（与 src/lib/crypto.ts 保持一致）
+const ALGORITHM = 'aes-256-gcm';
+const IV_LENGTH = 12;
+
 // ---------- helpers ----------
 
 function today() {
@@ -249,12 +253,8 @@ async function main() {
 }
 
 // ============================================================
-// 自动加密辅助
+// 自动加密辅助 (用于 .md 文件)
 // ============================================================
-
-const ALGORITHM = 'aes-256-gcm';
-const IV_LENGTH = 12;
-const TAG_LENGTH = 16;
 
 function tryEncrypt(mdPath) {
   const keyHex = process.env.CONTENT_KEY;
