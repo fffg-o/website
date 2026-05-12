@@ -211,11 +211,18 @@ export function encryptedContent(options: EncryptedLoaderOptions): Loader {
           // 解析 frontmatter
           const { data: rawData, body } = parseFrontmatter(markdown);
 
+          // 通过 Astro 的 Markdown 渲染管线处理 body，应用 remark/rehype 插件
+          const rendered = await context.renderMarkdown(markdown);
+
           // 使用 Astro 内置的 parse 验证 schema
           const entry = {
             id,
             data: rawData,
             body,
+            rendered: {
+              html: rendered.html,
+              metadata: rendered.metadata,
+            },
           };
 
           store.set(entry);
