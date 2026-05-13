@@ -1,0 +1,122 @@
+---
+// ============================================================
+// 迷宫入口 —— 初始界面
+//
+// 仅显示"进入迷宫"按钮，不展示房间信息、谜题等任何内容。
+// 进入链接使用 HMAC-SHA256 加密路由，与其他迷宫页面相同的加密逻辑。
+// ============================================================
+import Layout from '../../../layouts/Layout.astro';
+import type { RoomExport } from '../../../data/maze';
+import { encryptSlug } from '../../../lib/slug-crypto';
+
+/** 迷宫基础设施读取的导出数据 */
+export const room: RoomExport = {
+  id: 'welcome',
+  title: '迷宫入口',
+  description: '迷宫之旅从这里开始。',
+  date: '2026-05-13',
+  tags: ['迷宫', '入口'],
+  portals: [],
+};
+
+interface Props {
+  room: RoomExport;
+  baseUrl: string;
+}
+const { room: meta, baseUrl } = Astro.props;
+
+// 使用确定性 HMAC 加密（与其他迷宫页面相同的 logic）
+const entrySlug = encryptSlug('lockpick');
+---
+
+<Layout title="迷宫入口 - 迷宫 - fffg" description="迷宫之旅从这里开始">
+  <div class="welcome-page">
+    <div class="welcome-container">
+      <div class="welcome-icon">🏰</div>
+      <h1 class="welcome-title">迷宫</h1>
+      <p class="welcome-subtitle">隐藏着无数秘密与挑战</p>
+      <a
+        href={`${baseUrl}/maze/${entrySlug}`}
+        class="welcome-btn"
+      >
+        进入迷宫
+        <span class="welcome-btn-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .welcome-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 2rem 1rem;
+  }
+
+  .welcome-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    text-align: center;
+  }
+
+  .welcome-icon {
+    font-size: 3.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .welcome-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+  }
+
+  .welcome-subtitle {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
+
+  .welcome-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 30px color-mix(in srgb, var(--color-primary) 50%, transparent);
+  }
+
+  .welcome-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .welcome-btn-arrow {
+    transition: transform 0.2s;
+  }
+
+  .welcome-btn:hover .welcome-btn-arrow {
+    transform: translateX(4px);
+  }
+</style>

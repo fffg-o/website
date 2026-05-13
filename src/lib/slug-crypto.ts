@@ -6,10 +6,14 @@
  * - 同一 ID 始终生成相同的 slug，确保 dev server 热重载时链接一致
  * - 不加密内容，只混淆路由，防止用户通过猜测 URL 访问隐藏页面
  *
+ * 特殊用途（欢迎页）：
+ * - encryptSlugRandom() 加入随机盐值，每次构建生成不同的 slug
+ * - 用于入口链接，实现"每次都不一样"的效果
+ *
  * 密钥来源: 环境变量 CONTENT_KEY (与内容加解密共用同一密钥)
  */
 
-import { createHmac } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 
 /**
  * 获取密钥
@@ -35,7 +39,7 @@ function getKey(): Buffer {
  * - 同一 ID 始终生成相同的 slug（解决 dev server 热重载一致性）
  * - 无密钥无法预测 slug 值
  *
- * @param plaintext - 明文 ID (如 "maze-welcome")
+ * @param plaintext - 明文 ID (如 "lockpick")
  * @returns 64 字符十六进制字符串，用作 URL slug
  */
 export function encryptSlug(plaintext: string): string {
@@ -43,6 +47,46 @@ export function encryptSlug(plaintext: string): string {
   const hmac = createHmac('sha256', key);
   hmac.update(plaintext, 'utf-8');
   return hmac.digest('hex');
+}
+
+/**
+ * 将明文 ID 加密为随机十六进制 slug
+ *
+ * 每次构建生成不同的 slug（加入随机盐值）：
+ * - 用于欢迎页入口链接，实现"每次都不一样"的效果
+ * - 盐值占前 16 字符，HMAC 输出占后 64 字符，共 80 字符
+ * - 内部与 encryptSlug 共享同一密钥
+ *
+ * @param plaintext - 明文 ID (如 "lockpick")
+ * @returns 80 字符十六进制字符串（16 盐值 + 64 HMAC），用作 URL slug
+ */
+export function encryptSlugRandom(plaintext: string): string {
+  const key = getKey();
+  const salt = randomBytes(8).toString('hex'); // 16 字符盐值
+  const hmac = createHmac('sha256', key);
+  hmac.update(plaintext + ':' + salt, 'utf-8');
+  return salt + hmac.digest('hex'); // 16 + 64 = 80 字符
+}
+
+/**
+ * 从随机 slug 中提取明文
+ *
+ * 反向解析 encryptSlugRandom 生成的 slug，
+ * 提取前 16 字符作为盐值，用其验证后 64 字符的 HMAC。
+ *
+ * @param slug - 80 字符的随机十六进制 slug
+ * @param expected - 预期的明文 ID
+ * @returns 如果 HMAC 匹配返回 expected，否则返回 null
+ */
+export function verifyRandomSlug(slug: string, expected: string): string | null {
+  if (slug.length !== 80) return null;
+  const salt = slug.slice(0, 16);
+  const hmacPart = slug.slice(16);
+  const key = getKey();
+  const hmac = createHmac('sha256', key);
+  hmac.update(expected + ':' + salt, 'utf-8');
+  const expectedHmac = hmac.digest('hex');
+  return expectedHmac === hmacPart ? expected : null;
 }
 
 /**

@@ -1,0 +1,145 @@
+---
+// ============================================================
+// 最简界面 —— 纯开发用途
+//
+// 没有任何内容，只有一个跳转链接，用于开发调试。
+// ============================================================
+import Layout from '../../../layouts/Layout.astro';
+import type { RoomExport } from '../../../data/maze';
+import { encryptSlug } from '../../../lib/slug-crypto';
+
+/** 迷宫基础设施读取的导出数据 */
+export const room: RoomExport = {
+  id: 'minimal',
+  title: '最简界面（开发用）',
+  description: '纯开发用途，只有一个跳转链接。',
+  date: '2026-05-13',
+  tags: ['迷宫', '开发'],
+  portals: [
+    { label: '前往符文之门', description: '第一个迷宫房间', targetId: 'lockpick' },
+    { label: '前往宝藏密室', description: '寻宝之旅', targetId: 'treasure' },
+    { label: '前往黑暗通道', description: '探索未知', targetId: 'dark-passage' },
+    { label: '前往勇者试炼', description: '最终挑战', targetId: 'final' },
+  ],
+};
+
+interface Props {
+  room: RoomExport;
+  baseUrl: string;
+}
+const { room: meta, baseUrl } = Astro.props;
+
+function portalHref(targetId: string): string {
+  return `${baseUrl}/maze/${encryptSlug(targetId)}`;
+}
+---
+
+<Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description}>
+  <div class="minimal-page">
+    <div class="minimal-container">
+      <div class="minimal-badge">DEV</div>
+      <h1 class="minimal-title">{meta.title}</h1>
+      <p class="minimal-desc">{meta.description}</p>
+      <div class="minimal-links">
+        {
+          meta.portals.map((portal) => (
+            <a href={portalHref(portal.targetId)} class="minimal-link">
+              <span class="minimal-link-label">{portal.label}</span>
+              {portal.description && <span class="minimal-link-desc">{portal.description}</span>}
+              <span class="minimal-link-arrow">→</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .minimal-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    padding: 2rem 1rem;
+  }
+
+  .minimal-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+  }
+
+  .minimal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f59e0b;
+    background: color-mix(in srgb, #f59e0b 15%, transparent);
+    border: 1px solid color-mix(in srgb, #f59e0b 30%, transparent);
+    border-radius: 9999px;
+    letter-spacing: 0.05em;
+  }
+
+  .minimal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .minimal-desc {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .minimal-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .minimal-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .minimal-link:hover {
+    background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+    border-color: var(--color-accent);
+    transform: translateX(4px);
+  }
+
+  .minimal-link-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+    flex: 1;
+    text-align: left;
+  }
+
+  .minimal-link-desc {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .minimal-link-arrow {
+    font-size: 1.125rem;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+</style>
