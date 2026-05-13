@@ -35,35 +35,30 @@ export interface MazeGraph {
  * 地图节点位置定义
  *
  * 布局示意：
- *   welcome
- *     |
  *   lockpick ──→ treasure
  *     |              |
  *   dark-passage ──→ final
+ *
+ * 注意：welcome 页面仅作为迷宫入口，不包含在地图内。
  */
 export const mazeGraph: MazeGraph = {
   nodes: [
-    { id: 'welcome',       label: '入口',     icon: '🏰', x: 44, y: 8 },
-    { id: 'lockpick',      label: '符文之门',  icon: '🔑', x: 44, y: 56 },
-    { id: 'treasure',      label: '宝藏密室',  icon: '💎', x: 108, y: 56 },
-    { id: 'dark-passage',  label: '黑暗通道',  icon: '🌑', x: 44, y: 104 },
-    { id: 'final',         label: '勇者试炼',  icon: '⚔️', x: 108, y: 104 },
-    { id: 'minimal',       label: 'DEV',       icon: '🔧', x: 160, y: 150 },
+    { id: 'lockpick',      label: '符文之门',  icon: '🔑', x: 44, y: 8 },
+    { id: 'treasure',      label: '宝藏密室',  icon: '💎', x: 108, y: 8 },
+    { id: 'dark-passage',  label: '黑暗通道',  icon: '🌑', x: 44, y: 56 },
+    { id: 'final',         label: '勇者试炼',  icon: '⚔️', x: 108, y: 56 },
+    { id: 'minimal',       label: 'DEV',       icon: '🔧', x: 160, y: 100 },
   ],
   edges: [
-    // welcome → lockpick
-    { from: 'welcome', to: 'lockpick' },
     // lockpick → treasure, dark-passage
     { from: 'lockpick', to: 'treasure' },
     { from: 'lockpick', to: 'dark-passage' },
-    // treasure → welcome, final
-    { from: 'treasure', to: 'welcome' },
+    // treasure → final
     { from: 'treasure', to: 'final' },
     // dark-passage → final, treasure
     { from: 'dark-passage', to: 'final' },
     { from: 'dark-passage', to: 'treasure' },
-    // final → welcome, lockpick
-    { from: 'final', to: 'welcome' },
+    // final → lockpick
     { from: 'final', to: 'lockpick' },
     // minimal → all (dev)
     { from: 'minimal', to: 'lockpick' },

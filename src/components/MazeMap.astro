@@ -66,6 +66,7 @@ const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
   (function () {
     // ===== 常量 =====
     var VISITED_KEY = 'maze-visited-rooms';
+    var TRAVERSED_KEY = 'maze-traversed-edges';
     var MAP_POS_KEY = 'maze-map-position';
     var MAP_SIZE_KEY = 'maze-map-size';
     var BTN_POS_KEY = 'maze-btn-position';
@@ -93,6 +94,7 @@ const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
     function initSession() {
       if (!sessionStorage.getItem(SESSION_KEY)) {
         localStorage.removeItem(VISITED_KEY);
+        localStorage.removeItem(TRAVERSED_KEY);
         localStorage.removeItem(MAP_POS_KEY);
         localStorage.removeItem(MAP_SIZE_KEY);
         localStorage.removeItem(BTN_POS_KEY);
@@ -113,6 +115,22 @@ const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
         localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
       }
       return visited;
+    }
+
+    // ===== 路径追踪（记录实际走过的方向） =====
+    function getTraversedEdges() {
+      try { return JSON.parse(localStorage.getItem(TRAVERSED_KEY) || '[]'); }
+      catch (e) { return []; }
+    }
+
+    function recordTraversal(fromId, toId) {
+      if (!fromId || !toId || fromId === toId) return;
+      var edges = getTraversedEdges();
+      var key = fromId + '->' + toId;
+      if (edges.indexOf(key) === -1) {
+        edges.push(key);
+        localStorage.setItem(TRAVERSED_KEY, JSON.stringify(edges));
+      }
     }
 
     function buildVisitedData(allNodes, visitedSet) {
@@ -151,20 +169,45 @@ const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
       };
     }
 
-    function buildSvgHtml(visitedNodes, nodeMap, edges, currentRoomId) {
-      var visitedSet = new Set(visitedNodes.map(function (n) { return n.id; }));
+    function buildSvgHtml(visitedNodes, nodeMap, traversedEdgeKeys, currentRoomId) {
       if (visitedNodes.length === 0) return '';
 
+      // SVG 箭头定义
+      var defs = '<defs>'
+        + '<marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">'
+        + '<polygon points="0 0, 8 3, 0 6" fill="var(--color-primary)" opacity="0.6"/>'
+        + '</marker>'
+        + '</defs>';
+
+      // 只绘制实际走过的路径（带箭头方向）
       var lines = '';
-      edges.forEach(function (edge) {
-        var fromNode = nodeMap[edge.from];
-        var toNode = nodeMap[edge.to];
+      var R = NODE_RADIUS;
+      traversedEdgeKeys.forEach(function (key) {
+        var parts = key.split('->');
+        if (parts.length !== 2) return;
+        var fromId = parts[0];
+        var toId = parts[1];
+        var fromNode = nodeMap[fromId];
+        var toNode = nodeMap[toId];
         if (!fromNode || !toNode) return;
+
+        // 缩短线段两端到圆边缘，箭头末端正好衔接在目标圆边上
+        var dx = toNode.x - fromNode.x;
+        var dy = toNode.y - fromNode.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 1) return;
+        var ratio = R / dist;
+        var x1 = fromNode.x + dx * ratio;
+        var y1 = fromNode.y + dy * ratio;
+        var x2 = toNode.x - dx * ratio;
+        var y2 = toNode.y - dy * ratio;
+
         lines += '<line'
-          + ' x1="' + fromNode.x + '" y1="' + fromNode.y + '"'
-          + ' x2="' + toNode.x + '" y2="' + toNode.y + '"'
+          + ' x1="' + x1 + '" y1="' + y1 + '"'
+          + ' x2="' + x2 + '" y2="' + y2 + '"'
           + ' stroke="var(--color-primary)" stroke-width="1.5"'
-          + ' stroke-linecap="round" opacity="0.35"'
+          + ' stroke-linecap="round" opacity="0.45"'
+          + ' marker-end="url(#arrowhead)"'
           + '/>';
       });
 
@@ -186,11 +229,18 @@ const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
           + n.label + '</text>'
           + '</g>';
       });
-      return lines + nodesHtml;
+      return defs + lines + nodesHtml;
     }
 
     // ===== 主渲染函数 =====
-    function renderMap(svgEl, currentRoomId, allNodes, edges) {
+    function renderMap(svgEl, currentRoomId, allNodes) {
+      // 记录本次到访的路径（从 URL ?from= 参数读取来源房间）
+      var params = new URLSearchParams(window.location.search);
+      var fromRoom = params.get('from');
+      if (fromRoom && fromRoom !== currentRoomId) {
+        recordTraversal(fromRoom, currentRoomId);
+      }
+
       var visited = recordVisit(currentRoomId);
       var visitedSet = new Set(visited);
       var data = buildVisitedData(allNodes, visitedSet);
@@ -200,12 +250,13 @@ const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
       svgEl.setAttribute('viewBox', vbStr);
       svgEl.setAttribute('preserveAspectRatio', 'xMidYMin meet');
 
-      var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, edges, currentRoomId);
+      var traversedEdges = getTraversedEdges();
+      var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, traversedEdges, currentRoomId);
       svgEl.innerHTML = innerHtml;
     }
 
     // ===== 沉浸式按钮点击逻辑（桌面端切换地图，移动端浮窗） =====
-    function initToggleButton(currentRoomId, allNodes, edges) {
+    function initToggleButton(currentRoomId, allNodes) {
       var toggleBtn = document.getElementById('maze-map-toggle');
       var overlay = document.getElementById('maze-map-overlay');
       var closeBtn = document.getElementById('maze-map-overlay-close');
@@ -241,7 +292,8 @@ const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
           var visitedSet = new Set(visited);
           var data = buildVisitedData(allNodes, visitedSet);
           var viewBox = calcViewBox(data.nodes);
-          var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, edges, currentRoomId);
+          var traversedEdges = getTraversedEdges();
+          var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, traversedEdges, currentRoomId);
           body.innerHTML = '<svg viewBox="' + viewBox.vb + '" class="maze-map-svg" preserveAspectRatio="xMidYMin meet">'
             + innerHtml + '</svg>';
           overlay.classList.add('open');
@@ -518,12 +570,11 @@ const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
       var graphRaw = mapEl ? mapEl.getAttribute('data-maze-graph') || '' : '';
       var graphData = graphRaw ? JSON.parse(decodeURIComponent(graphRaw)) : null;
       var allNodes = graphData ? graphData.nodes : [];
-      var edges = graphData ? graphData.edges : [];
 
-      if (svgEl) renderMap(svgEl, currentRoomId, allNodes, edges);
+      if (svgEl) renderMap(svgEl, currentRoomId, allNodes);
 
       // 沉浸式按钮（桌面端切换地图，移动端浮窗）
-      initToggleButton(currentRoomId, allNodes, edges);
+      initToggleButton(currentRoomId, allNodes);
 
       // Requirement 2 & 3: 地图拖拽 + 缩放 + 按钮拖拽
       initMapDragAndResize();

@@ -11,7 +11,7 @@ interface Props {
 const { room, baseUrl } = Astro.props;
 
 function portalHref(targetId: string): string {
-  return `${baseUrl}/maze/${encryptSlug(targetId)}`;
+  return `${baseUrl}/maze/${encryptSlug(targetId)}?from=${room.id}`;
 }
 ---
 
