@@ -5,6 +5,7 @@
 // 没有任何内容，只有一个跳转链接，用于开发调试。
 // ============================================================
 import Layout from '../../../layouts/Layout.astro';
+import MazeMap from '../../../components/MazeMap.astro';
 import type { RoomExport } from '../../../data/maze';
 import { encryptSlug } from '../../../lib/slug-crypto';
 
@@ -35,6 +36,7 @@ function portalHref(targetId: string): string {
 ---
 
 <Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description}>
+  <MazeMap currentRoomId={meta.id} />
   <div class="minimal-page">
     <div class="minimal-container">
       <div class="minimal-badge">DEV</div>

@@ -1,0 +1,786 @@
+---
+// ============================================================
+// 迷宫地图组件
+//
+// 显示在迷宫房间页面右侧，动态展示玩家已访问的房间点位
+// 及连接关系。仅渲染已访问节点，保证任意数量节点下的
+// 可扩展性。
+//
+// 特性：
+// 1. 每次进入迷宫（新标签页/会话）清除旧地图数据，重新记录
+// 2. 地图组件可拖拽移动位置 + 自由缩放窗口大小
+// 3. 沉浸式切换按钮可拖拽移动位置
+// ============================================================
+import { mazeGraph, VISITED_ROOMS_KEY, getNodeById } from '../data/maze-map';
+
+interface Props {
+  /** 当前房间 ID */
+  currentRoomId: string;
+}
+
+const { currentRoomId } = Astro.props;
+
+// Server 端只渲染空容器，所有节点/连线由客户端 JS 动态构建
+---
+
+<!-- 地图容器（服务端仅渲染外壳，JS 动态填充） -->
+<div class="maze-map" id="maze-map" data-current-room={currentRoomId}>
+  <div class="maze-map-header" id="maze-map-header">
+    <span class="maze-map-title">🗺️ 地图</span>
+    <span class="maze-map-count" id="maze-map-count">0</span>
+  </div>
+  <div class="maze-map-body" id="maze-map-body">
+    <svg id="maze-map-svg" class="maze-map-svg"></svg>
+  </div>
+  <!-- 缩放拖拽手柄 -->
+  <div class="maze-map-resize-handle" id="maze-map-resize-handle">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M12 0v12H0" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+      <path d="M12 4v8H4" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+      <path d="M12 8v4H8" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+    </svg>
+  </div>
+</div>
+
+<!-- 移动端浮窗切换按钮（可拖拽） -->
+<button
+  id="maze-map-toggle"
+  class="maze-map-toggle-btn"
+  aria-label="切换地图"
+  title="地图"
+>
+  🗺️
+</button>
+
+<!-- 移动端地图浮窗 -->
+<div id="maze-map-overlay" class="maze-map-overlay">
+  <div class="maze-map-overlay-content">
+    <button id="maze-map-overlay-close" class="maze-map-overlay-close" aria-label="关闭地图">✕</button>
+    <div id="maze-map-overlay-body"></div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    // ===== 常量 =====
+    var VISITED_KEY = 'maze-visited-rooms';
+    var MAP_POS_KEY = 'maze-map-position';
+    var MAP_SIZE_KEY = 'maze-map-size';
+    var BTN_POS_KEY = 'maze-btn-position';
+    var SESSION_KEY = 'maze-session-active';
+
+    var NODE_RADIUS = 8;
+    var LABEL_OFFSET = 16;
+    var PADDING = 16;
+    var NODE_GAP = 48;
+
+    var MAP_MIN_WIDTH = 140;
+    var MAP_MIN_HEIGHT = 100;
+    var MAP_MAX_WIDTH = 500;
+    var MAP_MAX_HEIGHT = 600;
+
+    // ===== 所有房间节点定义（同 maze-map.ts） =====
+    var ALL_NODES = [
+      { id: 'welcome',       label: '入口',     icon: '🏰', x: 0, y: 0 },
+      { id: 'lockpick',      label: '符文之门',  icon: '🔑', x: 0, y: 48 },
+      { id: 'treasure',      label: '宝藏密室',  icon: '💎', x: 64, y: 48 },
+      { id: 'dark-passage',  label: '黑暗通道',  icon: '🌑', x: 0, y: 96 },
+      { id: 'final',         label: '勇者试炼',  icon: '⚔️', x: 64, y: 96 },
+      { id: 'minimal',       label: 'DEV',       icon: '🔧', x: 128, y: 140 },
+    ];
+
+    // ===== 所有连接定义 =====
+    var ALL_EDGES = [
+      { from: 'welcome', to: 'lockpick' },
+      { from: 'lockpick', to: 'treasure' },
+      { from: 'lockpick', to: 'dark-passage' },
+      { from: 'treasure', to: 'welcome' },
+      { from: 'treasure', to: 'final' },
+      { from: 'dark-passage', to: 'final' },
+      { from: 'dark-passage', to: 'treasure' },
+      { from: 'final', to: 'welcome' },
+      { from: 'final', to: 'lockpick' },
+      { from: 'minimal', to: 'lockpick' },
+      { from: 'minimal', to: 'treasure' },
+      { from: 'minimal', to: 'dark-passage' },
+      { from: 'minimal', to: 'final' },
+    ];
+
+    // ===== 存储工具 =====
+    function storeGet(key, def) {
+      try { return JSON.parse(localStorage.getItem(key) || 'null') || def; }
+      catch (e) { return def; }
+    }
+    function storeSet(key, val) {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+    }
+
+    // ===== Requirement 1: 新会话清除旧地图数据 =====
+    function initSession() {
+      if (!sessionStorage.getItem(SESSION_KEY)) {
+        localStorage.removeItem(VISITED_KEY);
+        localStorage.removeItem(MAP_POS_KEY);
+        localStorage.removeItem(MAP_SIZE_KEY);
+        localStorage.removeItem(BTN_POS_KEY);
+        sessionStorage.setItem(SESSION_KEY, '1');
+      }
+    }
+
+    // ===== 地图数据工具 =====
+    function getVisitedRooms() {
+      try { return JSON.parse(localStorage.getItem(VISITED_KEY) || '[]'); }
+      catch (e) { return []; }
+    }
+
+    function recordVisit(roomId) {
+      var visited = getVisitedRooms();
+      if (visited.indexOf(roomId) === -1) {
+        visited.push(roomId);
+        localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
+      }
+      return visited;
+    }
+
+    function buildVisitedData(allNodes, visitedSet) {
+      var nodes = [];
+      var nodeMap = {};
+      allNodes.forEach(function (n) {
+        if (visitedSet.has(n.id)) {
+          nodes.push(n);
+          nodeMap[n.id] = n;
+        }
+      });
+      return { nodes: nodes, nodeMap: nodeMap };
+    }
+
+    function calcViewBox(nodes) {
+      if (nodes.length === 0) {
+        return { vb: '0 0 200 0', width: 200, height: 0 };
+      }
+      var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      nodes.forEach(function (n) {
+        if (n.x < minX) minX = n.x;
+        if (n.y < minY) minY = n.y;
+        if (n.x > maxX) maxX = n.x;
+        if (n.y > maxY) maxY = n.y;
+      });
+      var w = maxX - minX + PADDING * 2 + NODE_RADIUS * 2;
+      var h = maxY - minY + PADDING * 2 + NODE_RADIUS * 2 + LABEL_OFFSET;
+      var ox = minX - PADDING;
+      var oy = minY - PADDING;
+      return {
+        vb: ox + ' ' + oy + ' ' + w + ' ' + h,
+        width: Math.max(w, 100),
+        height: Math.max(h, 40),
+        ox: ox,
+        oy: oy,
+      };
+    }
+
+    function buildSvgHtml(visitedNodes, nodeMap, currentRoomId) {
+      var visitedSet = new Set(visitedNodes.map(function (n) { return n.id; }));
+      if (visitedNodes.length === 0) return '';
+
+      var lines = '';
+      ALL_EDGES.forEach(function (edge) {
+        var fromNode = nodeMap[edge.from];
+        var toNode = nodeMap[edge.to];
+        if (!fromNode || !toNode) return;
+        lines += '<line'
+          + ' x1="' + fromNode.x + '" y1="' + fromNode.y + '"'
+          + ' x2="' + toNode.x + '" y2="' + toNode.y + '"'
+          + ' stroke="var(--color-primary)" stroke-width="1.5"'
+          + ' stroke-linecap="round" opacity="0.35"'
+          + '/>';
+      });
+
+      var nodesHtml = '';
+      visitedNodes.forEach(function (n) {
+        var isCurrent = n.id === currentRoomId;
+        var fill = isCurrent ? 'var(--color-primary)' : 'var(--color-card)';
+        var stroke = 'var(--color-primary)';
+        var strokeWidth = isCurrent ? '2.5' : '2';
+        var labelFill = isCurrent ? 'var(--color-primary)' : 'var(--color-text)';
+        nodesHtml += '<g class="maze-node-group'
+          + (isCurrent ? ' current' : '')
+          + '" data-room-id="' + n.id + '">'
+          + '<circle cx="' + n.x + '" cy="' + n.y + '" r="' + NODE_RADIUS + '"'
+          + ' fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>'
+          + '<text x="' + n.x + '" y="' + n.y + '"'
+          + ' text-anchor="middle" dominant-baseline="central" font-size="10">'
+          + n.icon + '</text>'
+          + '<text x="' + n.x + '" y="' + (n.y + LABEL_OFFSET) + '"'
+          + ' text-anchor="middle" dominant-baseline="central" font-size="7"'
+          + ' fill="' + labelFill + '" font-weight="' + (isCurrent ? 'bold' : 'normal') + '">'
+          + n.label + '</text>'
+          + '</g>';
+      });
+      return lines + nodesHtml;
+    }
+
+    // ===== 主渲染函数 =====
+    function renderMap(svgEl, countEl, currentRoomId) {
+      var visited = recordVisit(currentRoomId);
+      var visitedSet = new Set(visited);
+      var data = buildVisitedData(ALL_NODES, visitedSet);
+      var viewBox = calcViewBox(data.nodes);
+
+      if (countEl) countEl.textContent = String(data.nodes.length);
+
+      var vbStr = viewBox.vb;
+      svgEl.setAttribute('viewBox', vbStr);
+      svgEl.setAttribute('preserveAspectRatio', 'xMidYMin meet');
+
+      var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, currentRoomId);
+      svgEl.innerHTML = innerHtml;
+    }
+
+    // ===== 移动端浮窗 =====
+    function initMobileOverlay(currentRoomId) {
+      var toggleBtn = document.getElementById('maze-map-toggle');
+      var overlay = document.getElementById('maze-map-overlay');
+      var closeBtn = document.getElementById('maze-map-overlay-close');
+      var body = document.getElementById('maze-map-overlay-body');
+
+      if (!toggleBtn || !overlay || !body) return;
+
+      function showOverlay() {
+        var visited = getVisitedRooms();
+        var visitedSet = new Set(visited);
+        var data = buildVisitedData(ALL_NODES, visitedSet);
+        var viewBox = calcViewBox(data.nodes);
+        var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, currentRoomId);
+
+        body.innerHTML = '<svg viewBox="' + viewBox.vb + '" class="maze-map-svg" preserveAspectRatio="xMidYMin meet">'
+          + innerHtml + '</svg>';
+
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function hideOverlay() {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      toggleBtn.addEventListener('click', showOverlay);
+      if (closeBtn) closeBtn.addEventListener('click', hideOverlay);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) hideOverlay();
+      });
+    }
+
+    // ===== Requirement 2 & 3: 地图拖拽 + 缩放 =====
+    function initMapDragAndResize() {
+      var mapEl = document.getElementById('maze-map');
+      var headerEl = document.getElementById('maze-map-header');
+      var resizeHandle = document.getElementById('maze-map-resize-handle');
+      if (!mapEl || !headerEl || !resizeHandle) return;
+
+      // 恢复上次位置
+      var savedPos = storeGet(MAP_POS_KEY, null);
+      if (savedPos && typeof savedPos.x === 'number' && typeof savedPos.y === 'number') {
+        mapEl.style.left = savedPos.x + 'px';
+        mapEl.style.top = savedPos.y + 'px';
+        mapEl.style.right = 'auto';
+      }
+
+      // 恢复上次大小
+      var savedSize = storeGet(MAP_SIZE_KEY, null);
+      if (savedSize && typeof savedSize.w === 'number' && typeof savedSize.h === 'number') {
+        mapEl.style.width = savedSize.w + 'px';
+        mapEl.style.height = savedSize.h + 'px';
+      }
+
+      // ---- 拖拽移动 ----
+      var dragState = null;
+
+      function onDragStart(e) {
+        var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        if (clientX == null) return;
+
+        // 如果点击的是 resize handle，不触发拖拽
+        if (e.target === resizeHandle || resizeHandle.contains(e.target)) return;
+
+        var rect = mapEl.getBoundingClientRect();
+        dragState = {
+          startX: clientX,
+          startY: clientY,
+          origLeft: rect.left,
+          origTop: rect.top,
+        };
+        mapEl.classList.add('maze-map-dragging');
+
+        e.preventDefault();
+      }
+
+      function onDragMove(e) {
+        if (!dragState) return;
+        var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        if (clientX == null) return;
+
+        var dx = clientX - dragState.startX;
+        var dy = clientY - dragState.startY;
+        var newX = dragState.origLeft + dx;
+        var newY = dragState.origTop + dy;
+
+        // 边界约束：不允许拖出屏幕左侧/上侧
+        newX = Math.max(0, newX);
+        newY = Math.max(0, newY);
+
+        mapEl.style.left = newX + 'px';
+        mapEl.style.top = newY + 'px';
+        mapEl.style.right = 'auto';
+        mapEl.style.bottom = 'auto';
+
+        e.preventDefault();
+      }
+
+      function onDragEnd() {
+        if (!dragState) return;
+        dragState = null;
+        mapEl.classList.remove('maze-map-dragging');
+
+        // 保存位置
+        var left = parseFloat(mapEl.style.left);
+        var top = parseFloat(mapEl.style.top);
+        if (!isNaN(left) && !isNaN(top)) {
+          storeSet(MAP_POS_KEY, { x: left, y: top });
+        }
+      }
+
+      // 鼠标事件
+      headerEl.addEventListener('mousedown', onDragStart);
+      document.addEventListener('mousemove', onDragMove);
+      document.addEventListener('mouseup', onDragEnd);
+
+      // 触摸事件
+      headerEl.addEventListener('touchstart', onDragStart, { passive: false });
+      document.addEventListener('touchmove', onDragMove, { passive: false });
+      document.addEventListener('touchend', onDragEnd);
+
+      // ---- 缩放手柄 ----
+      var resizeState = null;
+
+      function onResizeStart(e) {
+        var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        if (clientX == null) return;
+
+        var rect = mapEl.getBoundingClientRect();
+        resizeState = {
+          startX: clientX,
+          startY: clientY,
+          origW: rect.width,
+          origH: rect.height,
+        };
+        mapEl.classList.add('maze-map-resizing');
+
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      function onResizeMove(e) {
+        if (!resizeState) return;
+        var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        if (clientX == null) return;
+
+        var dx = clientX - resizeState.startX;
+        var dy = clientY - resizeState.startY;
+        var newW = Math.max(MAP_MIN_WIDTH, Math.min(MAP_MAX_WIDTH, resizeState.origW + dx));
+        var newH = Math.max(MAP_MIN_HEIGHT, Math.min(MAP_MAX_HEIGHT, resizeState.origH + dy));
+
+        mapEl.style.width = newW + 'px';
+        mapEl.style.height = newH + 'px';
+
+        e.preventDefault();
+      }
+
+      function onResizeEnd() {
+        if (!resizeState) return;
+        resizeState = null;
+        mapEl.classList.remove('maze-map-resizing');
+
+        // 保存大小
+        var w = parseFloat(mapEl.style.width);
+        var h = parseFloat(mapEl.style.height);
+        if (!isNaN(w) && !isNaN(h)) {
+          storeSet(MAP_SIZE_KEY, { w: w, h: h });
+        }
+      }
+
+      resizeHandle.addEventListener('mousedown', onResizeStart);
+      document.addEventListener('mousemove', onResizeMove);
+      document.addEventListener('mouseup', onResizeEnd);
+
+      resizeHandle.addEventListener('touchstart', onResizeStart, { passive: false });
+      document.addEventListener('touchmove', onResizeMove, { passive: false });
+      document.addEventListener('touchend', onResizeEnd);
+    }
+
+    // ===== Requirement 2: 切换按钮拖拽 =====
+    function initToggleBtnDrag() {
+      var btn = document.getElementById('maze-map-toggle');
+      if (!btn) return;
+
+      // 恢复上次位置
+      var savedPos = storeGet(BTN_POS_KEY, null);
+      if (savedPos && typeof savedPos.x === 'number' && typeof savedPos.y === 'number') {
+        btn.style.left = savedPos.x + 'px';
+        btn.style.top = savedPos.y + 'px';
+        btn.style.bottom = 'auto';
+        btn.style.right = 'auto';
+      }
+
+      var dragState = null;
+
+      function onDragStart(e) {
+        var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        if (clientX == null) return;
+
+        var rect = btn.getBoundingClientRect();
+        dragState = {
+          startX: clientX,
+          startY: clientY,
+          origLeft: rect.left,
+          origTop: rect.top,
+        };
+        btn.classList.add('maze-map-toggle-dragging');
+
+        e.preventDefault();
+      }
+
+      function onDragMove(e) {
+        if (!dragState) return;
+        var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        if (clientX == null) return;
+
+        var dx = clientX - dragState.startX;
+        var dy = clientY - dragState.startY;
+        var newX = Math.max(0, dragState.origLeft + dx);
+        var newY = Math.max(0, dragState.origTop + dy);
+
+        btn.style.left = newX + 'px';
+        btn.style.top = newY + 'px';
+        btn.style.bottom = 'auto';
+        btn.style.right = 'auto';
+
+        e.preventDefault();
+      }
+
+      function onDragEnd() {
+        if (!dragState) return;
+        dragState = null;
+        btn.classList.remove('maze-map-toggle-dragging');
+
+        var left = parseFloat(btn.style.left);
+        var top = parseFloat(btn.style.top);
+        if (!isNaN(left) && !isNaN(top)) {
+          storeSet(BTN_POS_KEY, { x: left, y: top });
+        }
+      }
+
+      btn.addEventListener('mousedown', onDragStart);
+      document.addEventListener('mousemove', onDragMove);
+      document.addEventListener('mouseup', onDragEnd);
+
+      btn.addEventListener('touchstart', onDragStart, { passive: false });
+      document.addEventListener('touchmove', onDragMove, { passive: false });
+      document.addEventListener('touchend', onDragEnd);
+    }
+
+    // ===== 初始化 =====
+    function init() {
+      // Requirement 1: 新会话清除旧数据
+      initSession();
+
+      var mapEl = document.getElementById('maze-map');
+      var svgEl = document.getElementById('maze-map-svg');
+      var countEl = document.getElementById('maze-map-count');
+      var currentRoomId = mapEl ? mapEl.getAttribute('data-current-room') || '' : '';
+
+      if (svgEl) renderMap(svgEl, countEl, currentRoomId);
+      initMobileOverlay(currentRoomId);
+
+      // Requirement 2 & 3: 拖拽 + 缩放
+      initMapDragAndResize();
+      initToggleBtnDrag();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>
+
+<style>
+  /* ===== 桌面端可拖拽地图（右侧） ===== */
+  .maze-map {
+    position: fixed;
+    right: 1.5rem;
+    top: 6rem;
+    z-index: 30;
+    width: 170px;
+    min-width: 140px;
+    min-height: 100px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .dark .maze-map {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .maze-map:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .maze-map:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  .maze-map-dragging {
+    opacity: 0.92;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
+    transition: none !important;
+    user-select: none !important;
+  }
+
+  .maze-map-resizing {
+    user-select: none !important;
+    transition: none !important;
+  }
+
+  .maze-map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-accent) 4%, transparent);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .maze-map-header:active {
+    cursor: grabbing;
+  }
+
+  /* 拖拽提示光标 */
+  .maze-map-header::after {
+    content: '⠿';
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    opacity: 0.3;
+    margin-left: auto;
+    padding-left: 0.5rem;
+    line-height: 1;
+  }
+
+  .maze-map-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .maze-map-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.125rem;
+    padding: 0 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: white;
+    background: var(--color-primary);
+    border-radius: 999px;
+    line-height: 1;
+  }
+
+  .maze-map-body {
+    padding: 0.5rem;
+    min-height: 2rem;
+    overflow: hidden;
+  }
+
+  .maze-map-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ===== 缩放手柄 ===== */
+  .maze-map-resize-handle {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 3px;
+    cursor: nwse-resize;
+    color: var(--color-text-muted);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+  }
+
+  .maze-map:hover .maze-map-resize-handle,
+  .maze-map-resizing .maze-map-resize-handle {
+    opacity: 0.7;
+  }
+
+  .maze-map-resize-handle:hover {
+    opacity: 1 !important;
+  }
+
+  .maze-map-resize-handle svg {
+    display: block;
+  }
+
+  /* 当前房间脉冲动画 */
+  .maze-node-group.current circle {
+    animation: map-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes map-pulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.3); }
+  }
+
+  /* 窄屏隐藏固定地图 */
+  @media (max-width: 1200px) {
+    .maze-map {
+      display: none;
+    }
+  }
+
+  /* ===== 移动端切换按钮（可拖拽） ===== */
+  .maze-map-toggle-btn {
+    position: fixed;
+    left: 0.75rem;
+    bottom: 5rem;
+    z-index: 25;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-card);
+    color: var(--color-text-muted);
+    cursor: grab;
+    transition: box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    font-size: 1.125rem;
+    line-height: 1;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .maze-map-toggle-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+  }
+
+  .maze-map-toggle-btn:active {
+    cursor: grabbing;
+  }
+
+  .maze-map-toggle-dragging {
+    opacity: 0.85;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18) !important;
+    transition: none !important;
+  }
+
+  @media (max-width: 1200px) {
+    .maze-map-toggle-btn {
+      display: flex;
+    }
+  }
+
+  /* ===== 移动端浮窗 ===== */
+  .maze-map-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    padding: 1.5rem;
+  }
+
+  .maze-map-overlay.open {
+    display: flex;
+  }
+
+  .maze-map-overlay-content {
+    position: relative;
+    width: 240px;
+    max-width: 90vw;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 1rem 0.75rem 0.75rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: overlay-in 0.25s ease-out;
+  }
+
+  .dark .maze-map-overlay-content {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .maze-map-overlay-close {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+    transition: all 0.15s;
+  }
+
+  .maze-map-overlay-close:hover {
+    background: var(--color-border);
+    color: var(--color-text);
+  }
+</style>

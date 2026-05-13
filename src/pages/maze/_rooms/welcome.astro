@@ -6,6 +6,7 @@
 // 进入链接使用 HMAC-SHA256 加密路由，与其他迷宫页面相同的加密逻辑。
 // ============================================================
 import Layout from '../../../layouts/Layout.astro';
+import MazeMap from '../../../components/MazeMap.astro';
 import type { RoomExport } from '../../../data/maze';
 import { encryptSlug } from '../../../lib/slug-crypto';
 
@@ -30,6 +31,7 @@ const entrySlug = encryptSlug('lockpick');
 ---
 
 <Layout title="迷宫入口 - 迷宫 - fffg" description="迷宫之旅从这里开始">
+  <MazeMap currentRoomId={meta.id} />
   <div class="welcome-page">
     <div class="welcome-container">
       <div class="welcome-icon">🏰</div>

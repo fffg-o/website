@@ -3,6 +3,7 @@
 // 黑暗通道 —— 顺序操作谜题房间
 // ============================================================
 import Layout from '../../../layouts/Layout.astro';
+import MazeMap from '../../../components/MazeMap.astro';
 import PuzzleRoom from '../../../components/PuzzleRoom.astro';
 import type { RoomExport } from '../../../data/maze';
 
@@ -27,6 +28,7 @@ const { room: meta, baseUrl } = Astro.props;
 ---
 
 <Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description}>
+  <MazeMap currentRoomId={meta.id} />
   <div class="blog-page">
     <article class="blog-article prose prose-zinc dark:prose-invert">
       <header class="mb-6 not-prose sm:mb-8">
