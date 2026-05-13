@@ -2,13 +2,15 @@
 import '../styles/global.css';
 import Search from '../components/Search.astro';
 import ScrollButtons from '../components/ScrollButtons.astro';
+import ImmersiveToggle from '../components/ImmersiveToggle.astro';
 
 export interface Props {
   title: string;
   description?: string;
+  hideScrollButtons?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, hideScrollButtons = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -177,12 +179,7 @@ const base = import.meta.env.BASE_URL;
     </main>
 
     <!-- 沉浸模式切换按钮（仅在迷宫页面显示） -->
-    <button
-      id="immersive-toggle"
-      class="immersive-toggle-btn"
-      aria-label="切换沉浸模式"
-      title="切换沉浸模式"
-    >
+    <ImmersiveToggle id="immersive-toggle" storageKey="maze-btn-position">
       <svg id="immersive-expand-icon" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M8 3H5a2 2 0 0 0-2 2v3" />
         <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
@@ -195,7 +192,7 @@ const base = import.meta.env.BASE_URL;
         <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
         <path d="M3 16h3a2 2 0 0 1 2 2v3" />
       </svg>
-    </button>
+    </ImmersiveToggle>
 
     <!-- 页脚 -->
     <footer id="site-footer" class="border-t border-border py-6 md:py-8 transition-all duration-300 ease-in-out">
@@ -204,8 +201,8 @@ const base = import.meta.env.BASE_URL;
       </div>
     </footer>
 
-    <!-- 回到顶部 / 跳到底部按钮 -->
-    <ScrollButtons />
+    <!-- 回到顶部 / 跳到底部按钮（非迷宫页面显示） -->
+    {!hideScrollButtons && <ScrollButtons />}
   </body>
 </html>
 
@@ -213,42 +210,6 @@ const base = import.meta.env.BASE_URL;
   /* ========================================
      沉浸模式：隐藏 head/foot
      ======================================== */
-
-  /* 沉浸模式切换按钮 */
-  .immersive-toggle-btn {
-    position: fixed;
-    left: 0.75rem;
-    top: 50%;
-    z-index: 60;
-    transform: translateY(-50%);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 0.75rem;
-    border: 1px solid var(--color-border);
-    background: var(--color-card);
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  .immersive-toggle-btn:hover {
-    color: var(--color-text);
-    border-color: var(--color-primary);
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
-  }
-
-  .immersive-toggle-btn:active {
-    transform: translateY(-50%) scale(0.92);
-  }
-
-  /* 在迷宫页面显示按钮 */
-  .immersive-toggle-btn.visible {
-    display: flex;
-  }
 
   /* 沉浸模式激活：header 向上滑出，footer 向下滑出并完全隐藏 */
   body.head-foot-hidden #site-header {
@@ -261,18 +222,6 @@ const base = import.meta.env.BASE_URL;
     transform: translateY(100%);
     opacity: 0;
     visibility: hidden;
-  }
-
-  /* 暗色模式适配 */
-  .dark .immersive-toggle-btn {
-    background: var(--color-card);
-    border-color: var(--color-border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
-  .dark .immersive-toggle-btn:hover {
-    border-color: var(--color-primary);
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
   }
 </style>
 
@@ -622,12 +571,12 @@ const base = import.meta.env.BASE_URL;
       return window.location.pathname.indexOf('/maze') !== -1;
     }
 
-    // 更新按钮可见性
+    // 更新按钮可见性（非迷宫页面隐藏）
     function updateButtonVisibility() {
       if (isMazePage()) {
-        toggle.classList.add('visible');
+        toggle.style.display = '';
       } else {
-        toggle.classList.remove('visible');
+        toggle.style.display = 'none';
       }
     }
 
@@ -654,8 +603,11 @@ const base = import.meta.env.BASE_URL;
       sessionStorage.setItem('maze-immersive', isHidden ? '1' : '0');
     }
 
-    // 点击事件
-    toggle.addEventListener('click', toggleImmersive);
+    // 点击事件（拖拽时不触发切换）
+    toggle.addEventListener('click', function() {
+      if (toggle.dataset.immersiveDragged === 'true') return;
+      toggleImmersive();
+    });
 
     // 页面加载时初始化
     updateButtonVisibility();

@@ -1,0 +1,189 @@
+---
+// ============================================================
+// 沉浸式切换按钮组件
+//
+// 一个可自由拖拽位置的浮动按钮，支持桌面端和移动端，
+// 位置自动持久化到 localStorage。
+//
+// 使用方式：
+//   <ImmersiveToggle id="my-toggle" storageKey="my-pos-key">
+//     🗺️
+//   </ImmersiveToggle>
+//
+// 点击事件由外部通过 addEventListener 绑定，
+// 拖拽时会在按钮上设置 data-immersive-dragged="true"，
+// 外部点击处理器应检查此属性以区分点击和拖拽。
+// ============================================================
+
+export interface Props {
+  /** 按钮 DOM ID（必须唯一） */
+  id: string;
+  /** localStorage 中存储位置的键名 */
+  storageKey: string;
+}
+
+const { id, storageKey } = Astro.props;
+---
+
+<button
+  id={id}
+  class="immersive-toggle-btn"
+  data-immersive-storage={storageKey}
+>
+  <slot />
+</button>
+
+<script>
+  (function () {
+    var btn = /** @type {HTMLElement} */ (document.querySelector('[data-immersive-storage]'));
+    if (!btn) return;
+
+    var STORAGE_KEY = btn.getAttribute('data-immersive-storage') || '';
+
+    // ===== 恢复上次位置 =====
+    function loadPosition() {
+      if (!STORAGE_KEY) return;
+      try {
+        var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
+          btn.style.left = saved.x + 'px';
+          btn.style.top = saved.y + 'px';
+          btn.style.right = 'auto';
+          btn.style.bottom = 'auto';
+        }
+      } catch (e) {}
+    }
+
+    function savePosition(x, y) {
+      if (!STORAGE_KEY) return;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ x: x, y: y }));
+      } catch (e) {}
+    }
+
+    loadPosition();
+
+    // ===== 拖拽逻辑 =====
+    var dragState = null;
+
+    function onDragStart(e) {
+      var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+      if (clientX == null) return;
+
+      var rect = btn.getBoundingClientRect();
+      dragState = {
+        startX: clientX,
+        startY: clientY,
+        origLeft: rect.left,
+        origTop: rect.top,
+        moved: false,
+      };
+      btn.classList.add('immersive-toggle-dragging');
+      btn.dataset.immersiveDragged = 'false';
+
+      e.preventDefault();
+    }
+
+    function onDragMove(e) {
+      if (!dragState) return;
+      var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+      if (clientX == null) return;
+
+      var dx = clientX - dragState.startX;
+      var dy = clientY - dragState.startY;
+
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        dragState.moved = true;
+      }
+
+      var newX = Math.max(0, dragState.origLeft + dx);
+      var newY = Math.max(0, dragState.origTop + dy);
+
+      btn.style.left = newX + 'px';
+      btn.style.top = newY + 'px';
+      btn.style.right = 'auto';
+      btn.style.bottom = 'auto';
+
+      e.preventDefault();
+    }
+
+    function onDragEnd() {
+      if (!dragState) return;
+
+      if (dragState.moved) {
+        btn.dataset.immersiveDragged = 'true';
+        setTimeout(function () {
+          btn.dataset.immersiveDragged = 'false';
+        }, 200);
+      }
+
+      var left = parseFloat(btn.style.left);
+      var top = parseFloat(btn.style.top);
+      if (!isNaN(left) && !isNaN(top)) {
+        savePosition(left, top);
+      }
+
+      dragState = null;
+      btn.classList.remove('immersive-toggle-dragging');
+    }
+
+    btn.addEventListener('mousedown', onDragStart);
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+
+    btn.addEventListener('touchstart', onDragStart, { passive: false });
+    document.addEventListener('touchmove', onDragMove, { passive: false });
+    document.addEventListener('touchend', onDragEnd);
+  })();
+</script>
+
+<style>
+  .immersive-toggle-btn {
+    height: 40px;
+    width: 40px;
+    position: fixed;
+    z-index: 35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-card) 90%, transparent);
+    color: var(--color-text-muted);
+    cursor: grab;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    line-height: 1;
+    padding: 0;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .dark .immersive-toggle-btn {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .immersive-toggle-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+    transform: scale(1.05);
+  }
+
+  .immersive-toggle-btn:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+  }
+
+  .immersive-toggle-dragging {
+    opacity: 0.85;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2) !important;
+    transition: none !important;
+    transform: none !important;
+  }
+</style>

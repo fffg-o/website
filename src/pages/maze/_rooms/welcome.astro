@@ -30,7 +30,7 @@ const { room: meta, baseUrl } = Astro.props;
 const entrySlug = encryptSlug('lockpick');
 ---
 
-<Layout title="迷宫入口 - 迷宫 - fffg" description="迷宫之旅从这里开始">
+<Layout title="迷宫入口 - 迷宫 - fffg" description="迷宫之旅从这里开始" hideScrollButtons={true}>
   <MazeMap currentRoomId={meta.id} />
   <div class="welcome-page">
     <div class="welcome-container">

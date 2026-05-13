@@ -27,7 +27,7 @@ interface Props {
 const { room: meta, baseUrl } = Astro.props;
 ---
 
-<Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description}>
+<Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description} hideScrollButtons={true}>
   <MazeMap currentRoomId={meta.id} />
   <div class="blog-page">
     <article class="blog-article prose prose-zinc dark:prose-invert">
