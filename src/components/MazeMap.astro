@@ -10,6 +10,7 @@
 // 1. 每次进入迷宫（新标签页/会话）清除旧地图数据，重新记录
 // 2. 地图组件可拖拽移动位置 + 自由缩放窗口大小
 // 3. 沉浸式切换按钮可拖拽移动位置
+// 4. 兼容性：地图数据来源自 maze-map.ts，新增房间页面无需修改本组件
 // ============================================================
 import { mazeGraph, VISITED_ROOMS_KEY, getNodeById } from '../data/maze-map';
 
@@ -20,14 +21,15 @@ interface Props {
 
 const { currentRoomId } = Astro.props;
 
+// 将地图数据序列化后传给客户端 JS，保证新增房间时无需修改本组件
+const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
 // Server 端只渲染空容器，所有节点/连线由客户端 JS 动态构建
 ---
 
 <!-- 地图容器（服务端仅渲染外壳，JS 动态填充） -->
-<div class="maze-map" id="maze-map" data-current-room={currentRoomId}>
+<div class="maze-map" id="maze-map" data-current-room={currentRoomId} data-maze-graph={mazeGraphData}>
   <div class="maze-map-header" id="maze-map-header">
-    <span class="maze-map-title">🗺️ 地图</span>
-    <span class="maze-map-count" id="maze-map-count">0</span>
+    <span class="maze-map-title">地图</span>
   </div>
   <div class="maze-map-body" id="maze-map-body">
     <svg id="maze-map-svg" class="maze-map-svg"></svg>
@@ -72,39 +74,11 @@ const { currentRoomId } = Astro.props;
     var NODE_RADIUS = 8;
     var LABEL_OFFSET = 16;
     var PADDING = 16;
-    var NODE_GAP = 48;
 
     var MAP_MIN_WIDTH = 140;
     var MAP_MIN_HEIGHT = 100;
     var MAP_MAX_WIDTH = 500;
     var MAP_MAX_HEIGHT = 600;
-
-    // ===== 所有房间节点定义（同 maze-map.ts） =====
-    var ALL_NODES = [
-      { id: 'welcome',       label: '入口',     icon: '🏰', x: 0, y: 0 },
-      { id: 'lockpick',      label: '符文之门',  icon: '🔑', x: 0, y: 48 },
-      { id: 'treasure',      label: '宝藏密室',  icon: '💎', x: 64, y: 48 },
-      { id: 'dark-passage',  label: '黑暗通道',  icon: '🌑', x: 0, y: 96 },
-      { id: 'final',         label: '勇者试炼',  icon: '⚔️', x: 64, y: 96 },
-      { id: 'minimal',       label: 'DEV',       icon: '🔧', x: 128, y: 140 },
-    ];
-
-    // ===== 所有连接定义 =====
-    var ALL_EDGES = [
-      { from: 'welcome', to: 'lockpick' },
-      { from: 'lockpick', to: 'treasure' },
-      { from: 'lockpick', to: 'dark-passage' },
-      { from: 'treasure', to: 'welcome' },
-      { from: 'treasure', to: 'final' },
-      { from: 'dark-passage', to: 'final' },
-      { from: 'dark-passage', to: 'treasure' },
-      { from: 'final', to: 'welcome' },
-      { from: 'final', to: 'lockpick' },
-      { from: 'minimal', to: 'lockpick' },
-      { from: 'minimal', to: 'treasure' },
-      { from: 'minimal', to: 'dark-passage' },
-      { from: 'minimal', to: 'final' },
-    ];
 
     // ===== 存储工具 =====
     function storeGet(key, def) {
@@ -177,12 +151,12 @@ const { currentRoomId } = Astro.props;
       };
     }
 
-    function buildSvgHtml(visitedNodes, nodeMap, currentRoomId) {
+    function buildSvgHtml(visitedNodes, nodeMap, edges, currentRoomId) {
       var visitedSet = new Set(visitedNodes.map(function (n) { return n.id; }));
       if (visitedNodes.length === 0) return '';
 
       var lines = '';
-      ALL_EDGES.forEach(function (edge) {
+      edges.forEach(function (edge) {
         var fromNode = nodeMap[edge.from];
         var toNode = nodeMap[edge.to];
         if (!fromNode || !toNode) return;
@@ -206,9 +180,6 @@ const { currentRoomId } = Astro.props;
           + '" data-room-id="' + n.id + '">'
           + '<circle cx="' + n.x + '" cy="' + n.y + '" r="' + NODE_RADIUS + '"'
           + ' fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>'
-          + '<text x="' + n.x + '" y="' + n.y + '"'
-          + ' text-anchor="middle" dominant-baseline="central" font-size="10">'
-          + n.icon + '</text>'
           + '<text x="' + n.x + '" y="' + (n.y + LABEL_OFFSET) + '"'
           + ' text-anchor="middle" dominant-baseline="central" font-size="7"'
           + ' fill="' + labelFill + '" font-weight="' + (isCurrent ? 'bold' : 'normal') + '">'
@@ -219,24 +190,22 @@ const { currentRoomId } = Astro.props;
     }
 
     // ===== 主渲染函数 =====
-    function renderMap(svgEl, countEl, currentRoomId) {
+    function renderMap(svgEl, currentRoomId, allNodes, edges) {
       var visited = recordVisit(currentRoomId);
       var visitedSet = new Set(visited);
-      var data = buildVisitedData(ALL_NODES, visitedSet);
+      var data = buildVisitedData(allNodes, visitedSet);
       var viewBox = calcViewBox(data.nodes);
-
-      if (countEl) countEl.textContent = String(data.nodes.length);
 
       var vbStr = viewBox.vb;
       svgEl.setAttribute('viewBox', vbStr);
       svgEl.setAttribute('preserveAspectRatio', 'xMidYMin meet');
 
-      var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, currentRoomId);
+      var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, edges, currentRoomId);
       svgEl.innerHTML = innerHtml;
     }
 
     // ===== 沉浸式按钮点击逻辑（桌面端切换地图，移动端浮窗） =====
-    function initToggleButton(currentRoomId) {
+    function initToggleButton(currentRoomId, allNodes, edges) {
       var toggleBtn = document.getElementById('maze-map-toggle');
       var overlay = document.getElementById('maze-map-overlay');
       var closeBtn = document.getElementById('maze-map-overlay-close');
@@ -270,9 +239,9 @@ const { currentRoomId } = Astro.props;
           if (!overlay || !body) return;
           var visited = getVisitedRooms();
           var visitedSet = new Set(visited);
-          var data = buildVisitedData(ALL_NODES, visitedSet);
+          var data = buildVisitedData(allNodes, visitedSet);
           var viewBox = calcViewBox(data.nodes);
-          var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, currentRoomId);
+          var innerHtml = buildSvgHtml(data.nodes, data.nodeMap, edges, currentRoomId);
           body.innerHTML = '<svg viewBox="' + viewBox.vb + '" class="maze-map-svg" preserveAspectRatio="xMidYMin meet">'
             + innerHtml + '</svg>';
           overlay.classList.add('open');
@@ -543,13 +512,18 @@ const { currentRoomId } = Astro.props;
 
       var mapEl = document.getElementById('maze-map');
       var svgEl = document.getElementById('maze-map-svg');
-      var countEl = document.getElementById('maze-map-count');
       var currentRoomId = mapEl ? mapEl.getAttribute('data-current-room') || '' : '';
 
-      if (svgEl) renderMap(svgEl, countEl, currentRoomId);
+      // 从 data-maze-graph 属性读取地图数据（来源自 maze-map.ts，保证兼容性）
+      var graphRaw = mapEl ? mapEl.getAttribute('data-maze-graph') || '' : '';
+      var graphData = graphRaw ? JSON.parse(decodeURIComponent(graphRaw)) : null;
+      var allNodes = graphData ? graphData.nodes : [];
+      var edges = graphData ? graphData.edges : [];
+
+      if (svgEl) renderMap(svgEl, currentRoomId, allNodes, edges);
 
       // 沉浸式按钮（桌面端切换地图，移动端浮窗）
-      initToggleButton(currentRoomId);
+      initToggleButton(currentRoomId, allNodes, edges);
 
       // Requirement 2 & 3: 地图拖拽 + 缩放 + 按钮拖拽
       initMapDragAndResize();
