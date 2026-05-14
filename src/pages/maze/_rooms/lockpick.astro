@@ -23,8 +23,10 @@ export const room: RoomExport = {
 interface Props {
   room: RoomExport;
   baseUrl: string;
+  portals: import('../../../types/maze').Portal[];
+  nextPortal?: import('../../../types/maze').Portal;
 }
-const { room: meta, baseUrl } = Astro.props;
+const { room: meta, baseUrl, portals: externalPortals } = Astro.props;
 ---
 
 <Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description} hideScrollButtons={true}>
@@ -53,7 +55,7 @@ const { room: meta, baseUrl } = Astro.props;
         )}
       </header>
 
-      <PuzzleRoom room={meta} baseUrl={baseUrl}>
+      <PuzzleRoom room={meta} baseUrl={baseUrl} portals={externalPortals}>
         <div class="puzzle-area" id="puzzle-area">
           <div class="puzzle-atmosphere">
             <p>石门上的符文缓缓流动，似乎在等待某种开启的咒语……</p>

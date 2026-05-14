@@ -6,9 +6,18 @@ interface Props {
   /** RoomExport —— 只需 id 和 portals，迷宫层不关心任何谜题细节 */
   room: RoomExport;
   baseUrl: string;
+  /**
+   * 可选：从外部传入的传送门列表。
+   * 当提供此值时，覆盖 room.portals 用于渲染。
+   * 用于支持由配置动态注入 portals 的场景。
+   */
+  portals?: Portal[];
 }
 
-const { room, baseUrl } = Astro.props;
+const { room, baseUrl, portals: externalPortals } = Astro.props;
+
+/** 实际用于渲染的传送门列表 */
+const displayPortals = externalPortals ?? room.portals;
 
 function portalHref(targetId: string): string {
   return `${baseUrl}/maze/${encryptSlug(targetId)}?from=${room.id}`;
@@ -21,14 +30,14 @@ function portalHref(targetId: string): string {
 
   <!-- 跳转链接（迷宫层唯一关心的部分） -->
   {
-    room.portals.length > 0 && (
+    displayPortals.length > 0 && (
       <div class="puzzle-portals" id="puzzle-portals" style="display:none">
         <div class="puzzle-portals-glow"></div>
         <div class="puzzle-portals-content">
           <h3 class="puzzle-portals-title">🚪 可前往</h3>
           <div class="puzzle-portals-list">
             {
-              room.portals.map((portal: Portal) => (
+              displayPortals.map((portal: Portal) => (
                 <a href={portalHref(portal.targetId)} class="puzzle-portal-link">
                   <span class="puzzle-portal-icon">🚪</span>
                   <span class="puzzle-portal-info">

@@ -1,11 +1,15 @@
 ---
 // ============================================================
 // 勇者试炼 —— 选择题谜题房间
+//
+// 每个选项对应一个 portal（由外部传入），
+// 选择正确选项后展示对应 portal 的链接。
 // ============================================================
 import Layout from '../../../layouts/Layout.astro';
 import MazeMap from '../../../components/MazeMap.astro';
 import PuzzleRoom from '../../../components/PuzzleRoom.astro';
 import type { RoomExport } from '../../../data/maze';
+import type { Portal } from '../../../data/maze';
 
 /** 迷宫基础设施读取的导出数据 */
 export const room: RoomExport = {
@@ -23,8 +27,10 @@ export const room: RoomExport = {
 interface Props {
   room: RoomExport;
   baseUrl: string;
+  portals: Portal[];
+  nextPortal?: Portal;
 }
-const { room: meta, baseUrl } = Astro.props;
+const { room: meta, baseUrl, portals: externalPortals } = Astro.props;
 ---
 
 <Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description} hideScrollButtons={true}>
@@ -53,7 +59,7 @@ const { room: meta, baseUrl } = Astro.props;
         )}
       </header>
 
-      <PuzzleRoom room={meta} baseUrl={baseUrl}>
+      <PuzzleRoom room={meta} baseUrl={baseUrl} portals={externalPortals}>
         <div class="puzzle-area" id="puzzle-area">
           <div class="puzzle-atmosphere">
             <p>金色大门在身后缓缓关闭。前方有三个不同的出口，但只有一个通向自由……</p>

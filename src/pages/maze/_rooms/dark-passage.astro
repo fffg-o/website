@@ -6,6 +6,7 @@ import Layout from '../../../layouts/Layout.astro';
 import MazeMap from '../../../components/MazeMap.astro';
 import PuzzleRoom from '../../../components/PuzzleRoom.astro';
 import type { RoomExport } from '../../../data/maze';
+import type { Portal } from '../../../data/maze';
 
 /** 迷宫基础设施读取的导出数据 */
 export const room: RoomExport = {
@@ -23,8 +24,10 @@ export const room: RoomExport = {
 interface Props {
   room: RoomExport;
   baseUrl: string;
+  portals: Portal[];
+  nextPortal?: Portal;
 }
-const { room: meta, baseUrl } = Astro.props;
+const { room: meta, baseUrl, portals: externalPortals } = Astro.props;
 ---
 
 <Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description} hideScrollButtons={true}>
@@ -53,7 +56,7 @@ const { room: meta, baseUrl } = Astro.props;
         )}
       </header>
 
-      <PuzzleRoom room={meta} baseUrl={baseUrl}>
+      <PuzzleRoom room={meta} baseUrl={baseUrl} portals={externalPortals}>
         <div class="puzzle-area" id="puzzle-area">
           <div class="puzzle-atmosphere">
             <p>通道两侧每隔十步就有一支熄灭的火把。你需要在正确的顺序下点燃它们……</p>

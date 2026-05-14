@@ -8,6 +8,8 @@
 import Layout from '../../../layouts/Layout.astro';
 import MazeMap from '../../../components/MazeMap.astro';
 import type { RoomExport } from '../../../data/maze';
+import type { Portal } from '../../../data/maze';
+import { getMazeUrl } from '../../../lib/maze-url';
 import { encryptSlug } from '../../../lib/slug-crypto';
 
 /** 迷宫基础设施读取的导出数据 */
@@ -23,11 +25,15 @@ export const room: RoomExport = {
 interface Props {
   room: RoomExport;
   baseUrl: string;
+  portals: Portal[];
+  nextPortal?: Portal;
 }
-const { room: meta, baseUrl } = Astro.props;
+const { room: meta, baseUrl, portals } = Astro.props;
 
-// 使用确定性 HMAC 加密（与其他迷宫页面相同的 logic）
-const entrySlug = encryptSlug('lockpick');
+// 优先使用 props 传入的第一个 portal 作为入口，
+// 若没有则回退到硬编码的 'lockpick'（兼容过渡期）
+const entryTargetId = portals.length > 0 ? portals[0].targetId : 'lockpick';
+const entrySlug = encryptSlug(entryTargetId);
 ---
 
 <Layout title="迷宫入口 - 迷宫 - fffg" description="迷宫之旅从这里开始" hideScrollButtons={true}>

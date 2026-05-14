@@ -3,15 +3,17 @@
 // 迷宫路由处理器
 //
 // 职责：
-// 1. 收集 _rooms/*.astro 中导出的 id + portals
+// 1. 收集 _rooms/*.astro 中导出的 id
 // 2. 生成加密路由（getStaticPaths）
-// 3. 将渲染委托给对应的房间页面组件
+// 3. 从生成的迷宫配置中读取传送门数据
+// 4. 将渲染委托给对应的房间页面组件
 //
 // 迷宫基础设施不关心房间的内部逻辑（谜题配置、氛围等），
 // 只传递跳转链接（portals）和基础元数据。
 // ============================================================
 import { encryptSlug } from '../../lib/slug-crypto';
-import type { RoomExport } from '../../data/maze';
+import type { RoomExport, Portal } from '../../data/maze';
+import { mazeConfig } from '../../data/maze-config.generated';
 
 // 静态导入所有房间组件（Astro 需要静态引用才能渲染）
 import Welcome from './_rooms/welcome.astro';
@@ -39,12 +41,18 @@ export async function getStaticPaths() {
 
 const { room } = Astro.props;
 const base = import.meta.env.BASE_URL;
+
+// 从生成的迷宫配置中读取传送门
+// 如果配置中不存在该房间，回退到 room.portals
+const portals: Portal[] = mazeConfig.portalsMap[room.id] ?? room.portals;
+// 谜题房间：将配置中的第一个 portal 作为 nextPortal（解谜后展示）
+const nextPortal: Portal | undefined = portals.length > 0 ? portals[0] : undefined;
 ---
 
 <!-- 委托给对应的房间页面组件渲染 -->
-{room.id === 'welcome' && <Welcome room={room} baseUrl={base} />}
-{room.id === 'lockpick' && <Lockpick room={room} baseUrl={base} />}
-{room.id === 'treasure' && <Treasure room={room} baseUrl={base} />}
-{room.id === 'dark-passage' && <DarkPassage room={room} baseUrl={base} />}
-{room.id === 'final' && <Final room={room} baseUrl={base} />}
-{room.id === 'minimal' && <Minimal room={room} baseUrl={base} />}
+{room.id === 'welcome' && <Welcome room={room} baseUrl={base} portals={portals} />}
+{room.id === 'lockpick' && <Lockpick room={room} baseUrl={base} portals={portals} nextPortal={nextPortal} />}
+{room.id === 'treasure' && <Treasure room={room} baseUrl={base} portals={portals} nextPortal={nextPortal} />}
+{room.id === 'dark-passage' && <DarkPassage room={room} baseUrl={base} portals={portals} nextPortal={nextPortal} />}
+{room.id === 'final' && <Final room={room} baseUrl={base} portals={portals} />}
+{room.id === 'minimal' && <Minimal room={room} baseUrl={base} portals={portals} />}
