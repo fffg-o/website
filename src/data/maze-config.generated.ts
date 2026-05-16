@@ -34,68 +34,64 @@ export const mazeConfig: MazeConfig = {
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 28.9,
-    "y": 31.6
+    "x": 29.4,
+    "y": 32.5
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 26.9,
-    "y": 62.6
+    "x": 49.8,
+    "y": 66.7
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 71,
-    "y": 70.6
+    "x": 73.4,
+    "y": 64.8
   },
   {
     "id": "minimal",
     "label": "DEV",
-    "x": 49.1,
-    "y": 27.3
+    "x": 75.7,
+    "y": 37.9
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 49.8,
-    "y": 63.2
+    "x": 28.3,
+    "y": 70.4
   },
   {
     "id": "welcome",
     "label": "迷宫入口",
-    "x": 75.5,
-    "y": 29.8
+    "x": 54.8,
+    "y": 34.7
   }
 ],
   edges: [
   {
     "source": "dark-passage",
-    "target": "minimal"
-  },
-  {
-    "source": "minimal",
     "target": "welcome"
-  },
-  {
-    "source": "welcome",
-    "target": "treasure"
-  },
-  {
-    "source": "minimal",
-    "target": "final"
-  },
-  {
-    "source": "welcome",
-    "target": "lockpick"
-  },
-  {
-    "source": "minimal",
-    "target": "treasure"
   },
   {
     "source": "dark-passage",
-    "target": "welcome"
+    "target": "minimal"
+  },
+  {
+    "source": "dark-passage",
+    "target": "treasure"
+  },
+  {
+    "source": "treasure",
+    "target": "lockpick"
+  },
+  {
+    "source": "welcome",
+    "target": "final"
+  },
+  {
+    "source": "final",
+    "target": "minimal"
   },
   {
     "source": "final",
@@ -105,17 +101,27 @@ export const mazeConfig: MazeConfig = {
   portalsMap: {
   "dark-passage": [
     {
+      "label": "闪烁的传送门",
+      "description": "通往 迷宫入口",
+      "targetId": "welcome"
+    },
+    {
       "label": "水晶般的光幕",
       "description": "通往 DEV",
       "targetId": "minimal"
     },
     {
-      "label": "闪烁的传送门",
-      "description": "通往 迷宫入口",
-      "targetId": "welcome"
+      "label": "雕花的木门",
+      "description": "通往 宝藏密室",
+      "targetId": "treasure"
     }
   ],
   "final": [
+    {
+      "label": "一扇古老的门",
+      "description": "通往 迷宫入口",
+      "targetId": "welcome"
+    },
     {
       "label": "藤蔓覆盖的拱门",
       "description": "通往 DEV",
@@ -129,9 +135,9 @@ export const mazeConfig: MazeConfig = {
   ],
   "lockpick": [
     {
-      "label": "水晶般的光幕",
-      "description": "通往 迷宫入口",
-      "targetId": "welcome"
+      "label": "符文环绕的入口",
+      "description": "通往 宝藏密室",
+      "targetId": "treasure"
     },
     {
       "label": "一扇古老的门",
@@ -146,53 +152,33 @@ export const mazeConfig: MazeConfig = {
       "targetId": "dark-passage"
     },
     {
-      "label": "闪烁的传送门",
-      "description": "通往 迷宫入口",
-      "targetId": "welcome"
-    },
-    {
       "label": "藤蔓覆盖的拱门",
       "description": "通往 勇者试炼",
       "targetId": "final"
-    },
-    {
-      "label": "雕花的木门",
-      "description": "通往 宝藏密室",
-      "targetId": "treasure"
     }
   ],
   "treasure": [
     {
-      "label": "符文环绕的入口",
-      "description": "通往 迷宫入口",
-      "targetId": "welcome"
+      "label": "雕花的木门",
+      "description": "通往 黑暗通道",
+      "targetId": "dark-passage"
     },
     {
-      "label": "雕花的木门",
-      "description": "通往 DEV",
-      "targetId": "minimal"
+      "label": "符文环绕的入口",
+      "description": "通往 符文之门",
+      "targetId": "lockpick"
     }
   ],
   "welcome": [
     {
       "label": "闪烁的传送门",
-      "description": "通往 DEV",
-      "targetId": "minimal"
-    },
-    {
-      "label": "符文环绕的入口",
-      "description": "通往 宝藏密室",
-      "targetId": "treasure"
-    },
-    {
-      "label": "水晶般的光幕",
-      "description": "通往 符文之门",
-      "targetId": "lockpick"
-    },
-    {
-      "label": "闪烁的传送门",
       "description": "通往 黑暗通道",
       "targetId": "dark-passage"
+    },
+    {
+      "label": "一扇古老的门",
+      "description": "通往 勇者试炼",
+      "targetId": "final"
     }
   ]
 },
