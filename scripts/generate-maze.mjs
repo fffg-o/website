@@ -576,7 +576,7 @@ function main() {
   //    排除: minimal（固定传送门开发页）、已有完整 portals 的房间
   //    约束: 没有任何房间的传送门会指向 minimal
   const graphRoomIds = allRoomIds.filter(
-    (id) => id !== 'minimal' && !fixedPortals[id],
+    (id) => id !== 'minimal'&& id !== 'test' && !fixedPortals[id],
   );
   console.log(`🎲 迷宫主房间 (${graphRoomIds.length} 个):`);
   graphRoomIds.forEach((id) => console.log(`   - ${id}`));

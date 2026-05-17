@@ -4,24 +4,26 @@
 //
 // 没有任何内容，只有跳转链接，用于开发调试。
 // ============================================================
-import Layout from '../../../layouts/Layout.astro';
 import MazeMap from '../../../components/MazeMap.astro';
 import type { RoomExport } from '../../../data/maze';
 import type { Portal } from '../../../data/maze';
 import { getMazeUrl } from '../../../lib/maze-url';
 
+// 页面元数据（局部常量，不导出）
+const title = '最简界面（开发用）';
+const description = '纯开发用途，只有一个跳转链接。';
+const date = '2026-05-13';
+const tags = ['迷宫', '开发'];
+
 /** 迷宫基础设施读取的导出数据 */
 export const room: RoomExport = {
   id: 'minimal',
-  title: '最简界面（开发用）',
-  description: '纯开发用途，只有一个跳转链接。',
-  date: '2026-05-13',
-  tags: ['迷宫', '开发'],
   portalSlots: [
     { label: '前往符文之门', description: '第一个迷宫房间' },
     { label: '前往宝藏密室', description: '寻宝之旅' },
     { label: '前往黑暗通道', description: '探索未知' },
     { label: '前往勇者试炼', description: '最终挑战' },
+    { label:"test",description:"test"}
   ],
   /** 固定传送门，不由生成器随机分配 */
   portals: [
@@ -29,6 +31,7 @@ export const room: RoomExport = {
     { label: '前往宝藏密室', description: '寻宝之旅', targetId: 'treasure' },
     { label: '前往黑暗通道', description: '探索未知', targetId: 'dark-passage' },
     { label: '前往勇者试炼', description: '最终挑战', targetId: 'final' },
+    { label:"test",description:"test",targetId:"test"}
   ],
 };
 
@@ -44,27 +47,25 @@ function portalHref(targetId: string): string {
 }
 ---
 
-<Layout title={`${meta.title} - 迷宫 - fffg`} description={meta.description} hideScrollButtons={true}>
-  <MazeMap currentRoomId={meta.id} />
-  <div class="minimal-page">
-    <div class="minimal-container">
-      <div class="minimal-badge">DEV</div>
-      <h1 class="minimal-title">{meta.title}</h1>
-      <p class="minimal-desc">{meta.description}</p>
-      <div class="minimal-links">
-        {
-          portals.map((portal) => (
-            <a href={portalHref(portal.targetId)} class="minimal-link">
-              <span class="minimal-link-label">{portal.label}</span>
-              {portal.description && <span class="minimal-link-desc">{portal.description}</span>}
-              <span class="minimal-link-arrow">→</span>
-            </a>
-          ))
-        }
-      </div>
+<MazeMap currentRoomId={meta.id} />
+<div class="minimal-page">
+  <div class="minimal-container">
+    <div class="minimal-badge">DEV</div>
+    <h1 class="minimal-title">{title}</h1>
+    <p class="minimal-desc">{description}</p>
+    <div class="minimal-links">
+      {
+        portals.map((portal) => (
+          <a href={portalHref(portal.targetId)} class="minimal-link">
+            <span class="minimal-link-label">{portal.label}</span>
+            {portal.description && <span class="minimal-link-desc">{portal.description}</span>}
+            <span class="minimal-link-arrow">→</span>
+          </a>
+        ))
+      }
     </div>
   </div>
-</Layout>
+</div>
 
 <style>
   .minimal-page {

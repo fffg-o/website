@@ -1,0 +1,530 @@
+---
+import '../styles/global.css';
+import Search from '../components/Search.astro';
+import ImmersiveToggle from '../components/ImmersiveToggle.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" href={`${base}/favicon.ico`} />
+    <meta name="generator" content={Astro.generator} />
+    <title>迷宫 - fffg</title>
+    <!-- 防止闪烁：在页面渲染前立即设置暗色模式 -->
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-surface text-text antialiased">
+    <!-- 导航栏 -->
+    <header id="site-header" class="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md transition-all duration-300 ease-in-out">
+      <nav class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 md:py-4">
+        <a href={base} class="text-lg font-bold tracking-tight text-text transition-colors hover:text-primary shrink-0">
+          fffg
+        </a>
+
+        <!-- 桌面端导航链接 -->
+        <div class="hidden md:flex md:items-center md:gap-4">
+          <ul class="flex items-center gap-6">
+            <li>
+              <a href={base} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                首页
+              </a>
+            </li>
+            <li>
+              <a href={`${base}/blog`} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                博客
+              </a>
+            </li>
+            <li id="nav-note" class="hidden">
+              <a href={`${base}/note`} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                随笔
+              </a>
+            </li>
+            <li id="nav-maze" class="hidden">
+              <a href={`${base}/maze`} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                迷宫
+              </a>
+            </li>
+            <li>
+              <a href={`${base}/projects`} class="text-sm font-medium text-text-muted transition-colors hover:text-text">
+                项目
+              </a>
+            </li>
+          </ul>
+
+          <!-- 搜索按钮 -->
+          <Search />
+
+          <!-- 暗色模式切换按钮 -->
+          <button
+            id="theme-toggle"
+            class="flex size-8 translate-y-[10%] items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-border hover:text-text"
+            aria-label="切换暗色模式"
+            title="切换暗色模式"
+          >
+            <!-- 太阳图标（亮色模式） -->
+            <svg id="sun-icon" class="hidden size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            </svg>
+            <!-- 月亮图标（暗色模式） -->
+            <svg id="moon-icon" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 移动端操作栏 -->
+        <div class="flex items-center gap-2 md:hidden">
+          <Search />
+          <button
+            id="theme-toggle-mobile"
+            class="flex size-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-border hover:text-text"
+            aria-label="切换暗色模式"
+            title="切换暗色模式"
+          >
+            <svg id="sun-icon-mobile" class="hidden size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            </svg>
+            <svg id="moon-icon-mobile" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+          <!-- 汉堡菜单按钮 -->
+          <button
+            id="mobile-menu-btn"
+            class="flex size-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-border hover:text-text"
+            aria-label="打开菜单"
+            title="菜单"
+          >
+            <svg id="menu-icon" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+            <svg id="close-icon" class="hidden size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- 移动端抽屉遮罩层 -->
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+
+    <!-- 移动端右侧滑入菜单 -->
+    <div id="mobile-drawer" class="mobile-drawer">
+      <div class="drawer-inner">
+        <!-- 网站标题 -->
+        <span class="drawer-site-title">fffg</span>
+
+        <!-- 导航菜单 -->
+        <nav class="drawer-nav">
+          <a href={base} class="drawer-nav-link">首页</a>
+          <a href={`${base}/blog`} class="drawer-nav-link">博客</a>
+          <a id="drawer-nav-note" href={`${base}/note`} class="drawer-nav-link hidden">随笔</a>
+          <a id="drawer-nav-maze" href={`${base}/maze`} class="drawer-nav-link hidden">迷宫</a>
+          <a href={`${base}/projects`} class="drawer-nav-link">项目</a>
+        </nav>
+
+        <!-- 分隔线 -->
+        <div class="drawer-divider"></div>
+
+        <!-- 文章目录（仅博客文章页面由 TOC 组件激活显示） -->
+        <div id="drawer-toc" class="drawer-toc">
+          <h3 class="drawer-toc-title">目录</h3>
+          <div id="drawer-toc-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主内容 -->
+    <main id="site-main" class="mx-auto max-w-5xl px-4 py-8 md:py-12">
+      <slot />
+    </main>
+
+    <!-- 沉浸模式切换按钮（仅在迷宫页面显示） -->
+    <ImmersiveToggle id="immersive-toggle" storageKey="immersive-toggle-position">
+      <svg id="immersive-expand-icon" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+        <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+        <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+        <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+      </svg>
+      <svg id="immersive-collapse-icon" class="size-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3v3a2 2 0 0 1-2 2H3" />
+        <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+        <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+        <path d="M3 16h3a2 2 0 0 1 2 2v3" />
+      </svg>
+    </ImmersiveToggle>
+
+    <!-- 页脚 -->
+    <footer id="site-footer" class="border-t border-border py-6 md:py-8 transition-all duration-300 ease-in-out">
+      <div class="mx-auto max-w-4xl px-4 text-center text-sm text-text-muted">
+        <p>&copy; {new Date().getFullYear()} <button id="footer-fffg" class="footer-fffg">fffg</button>. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  /* ========================================
+     沉浸模式：隐藏 head/foot
+     ======================================== */
+
+  /* 沉浸模式激活：header 向上滑出，footer 向下滑出并完全隐藏 */
+  body.head-foot-hidden #site-header {
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  body.head-foot-hidden #site-footer {
+    transform: translateY(100%);
+    opacity: 0;
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  // ===== 暗色模式切换 =====
+  function initThemeToggle(btnId, sunId, moonId) {
+    const toggle = document.getElementById(btnId);
+    const sunIcon = document.getElementById(sunId);
+    const moonIcon = document.getElementById(moonId);
+    if (!toggle) return;
+
+    const html = document.documentElement;
+
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        html.classList.add('dark');
+        sunIcon?.classList.remove('hidden');
+        moonIcon?.classList.add('hidden');
+      } else {
+        html.classList.remove('dark');
+        sunIcon?.classList.add('hidden');
+        moonIcon?.classList.remove('hidden');
+      }
+      localStorage.setItem('theme', theme);
+    }
+
+    // 初始化图标
+    if (html.classList.contains('dark')) {
+      sunIcon?.classList.remove('hidden');
+      moonIcon?.classList.add('hidden');
+    } else {
+      sunIcon?.classList.add('hidden');
+      moonIcon?.classList.remove('hidden');
+    }
+
+    toggle.addEventListener('click', () => {
+      const isDark = html.classList.contains('dark');
+      setTheme(isDark ? 'light' : 'dark');
+    });
+  }
+
+  initThemeToggle('theme-toggle', 'sun-icon', 'moon-icon');
+  initThemeToggle('theme-toggle-mobile', 'sun-icon-mobile', 'moon-icon-mobile');
+
+  // ===== 移动端右侧抽屉菜单 =====
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const drawer = document.getElementById('mobile-drawer');
+  const overlay = document.getElementById('drawer-overlay');
+  const menuIcon = document.getElementById('menu-icon');
+  const closeIcon = document.getElementById('close-icon');
+
+  function openDrawer() {
+    if (!drawer || !overlay) return;
+    drawer.classList.add('open');
+    overlay.classList.add('show');
+    menuIcon?.classList.add('hidden');
+    closeIcon?.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    if (!drawer || !overlay) return;
+    drawer.classList.remove('open');
+    overlay.classList.remove('show');
+    menuIcon?.classList.remove('hidden');
+    closeIcon?.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  if (menuBtn) {
+    menuBtn.addEventListener('click', () => {
+      const isOpen = drawer?.classList.contains('open');
+      if (isOpen) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
+    });
+  }
+
+  overlay?.addEventListener('click', closeDrawer);
+
+  drawer?.querySelectorAll('.drawer-nav-link').forEach((link) => {
+    link.addEventListener('click', closeDrawer);
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      closeDrawer();
+    }
+  });
+
+  // ===== 页脚彩蛋：点击 fffg 5 次显示随笔和迷宫 =====
+  (function() {
+    const fffgBtn = document.getElementById('footer-fffg');
+    const navNote = document.getElementById('nav-note');
+    const drawerNavNote = document.getElementById('drawer-nav-note');
+    const navMaze = document.getElementById('nav-maze');
+    const drawerNavMaze = document.getElementById('drawer-nav-maze');
+    let clickCount = parseInt(localStorage.getItem('note-easter-egg') || '0', 10);
+
+    if (!fffgBtn) return;
+
+    // 颜色数组 - 每次点击变换
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+    // 更新按钮状态
+    function updateBtnState(count) {
+      // 清除所有进度类
+      for (let i = 1; i <= 4; i++) {
+        fffgBtn.classList.remove(`progress-${i}`);
+      }
+      fffgBtn.classList.remove('unlocked');
+
+      if (count >= 5) {
+        fffgBtn.classList.add('unlocked');
+      } else if (count > 0) {
+        fffgBtn.classList.add(`progress-${count}`);
+      }
+    }
+
+    // 添加涟漪效果
+    function createRipple(e) {
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const rect = fffgBtn.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      fffgBtn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    }
+
+    // 创建五彩纸屑
+    function createConfetti() {
+      const colors_party = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+      for (let i = 0; i < 30; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        const color = colors_party[Math.floor(Math.random() * colors_party.length)];
+        const left = Math.random() * 100;
+        const delay = Math.random() * 0.5;
+        const size = 4 + Math.random() * 8;
+        const duration = 2.5 + Math.random() * 2;
+        piece.style.cssText = `
+          left: ${left}vw;
+          top: -10px;
+          width: ${size}px;
+          height: ${size}px;
+          background: ${color};
+          animation-delay: ${delay}s;
+          animation-duration: ${duration}s;
+          border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        `;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2000 + delay * 1000);
+      }
+    }
+
+    // 显示隐藏的导航链接（随笔和迷宫）
+    function revealNavItems(animate) {
+      // 随笔
+      navNote?.classList.remove('hidden');
+      drawerNavNote?.classList.remove('hidden');
+      if (animate) {
+        navNote?.classList.add('nav-note-reveal');
+        drawerNavNote?.classList.add('drawer-nav-note-reveal');
+      }
+      // 迷宫
+      navMaze?.classList.remove('hidden');
+      drawerNavMaze?.classList.remove('hidden');
+      if (animate) {
+        navMaze?.classList.add('nav-note-reveal');
+        drawerNavMaze?.classList.add('drawer-nav-note-reveal');
+      }
+    }
+
+    // 显示 Toast 通知
+    function showToast() {
+      const existing = document.querySelector('.easter-toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = 'easter-toast';
+      toast.innerHTML = `
+        <span class="toast-icon">🔓</span>
+        <span>
+          <span class="toast-text">隐藏区域已解锁</span>
+          <span class="toast-sub">· 可在导航栏查看</span>
+        </span>
+      `;
+      document.body.appendChild(toast);
+
+      // 触发重排后显示
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          toast.classList.add('show');
+        });
+      });
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+      }, 3000);
+    }
+
+    // 如果已解锁，直接显示
+    if (clickCount >= 5) {
+      revealNavItems(false);
+      const animShown = localStorage.getItem('note-animation-shown') === 'true';
+      if (!animShown) {
+        // 首次显示时播放动画
+        navNote?.classList.add('nav-note-reveal');
+        drawerNavNote?.classList.add('drawer-nav-note-reveal');
+        navMaze?.classList.add('nav-note-reveal');
+        drawerNavMaze?.classList.add('drawer-nav-note-reveal');
+        localStorage.setItem('note-animation-shown', 'true');
+      }
+      updateBtnState(clickCount);
+    } else {
+      updateBtnState(clickCount);
+    }
+
+    fffgBtn.addEventListener('click', (e) => {
+      clickCount++;
+      localStorage.setItem('note-easter-egg', String(clickCount));
+
+      createRipple(e);
+
+      if (clickCount < 5) {
+        // 未解锁：更新进度和按钮颜色
+        updateBtnState(clickCount);
+        fffgBtn.style.color = colors[clickCount - 1];
+        setTimeout(() => { fffgBtn.style.color = ''; }, 300);
+      } else {
+        // 已解锁：触发所有特效
+        updateBtnState(clickCount);
+        revealNavItems(true);
+        localStorage.setItem('note-animation-shown', 'true');
+        createConfetti();
+        showToast();
+      }
+    });
+  })();
+
+  // ===== 沉浸模式：迷宫页面隐藏头尾 =====
+  (function() {
+    var toggle = document.getElementById('immersive-toggle');
+    if (!toggle) return;
+
+    var expandIcon = document.getElementById('immersive-expand-icon');
+    var collapseIcon = document.getElementById('immersive-collapse-icon');
+
+    // 检查当前页面是否为迷宫页面
+    function isMazePage() {
+      return window.location.pathname.indexOf('/maze') !== -1;
+    }
+
+    // 更新按钮可见性（非迷宫页面隐藏）
+    function updateButtonVisibility() {
+      if (isMazePage()) {
+        toggle.style.display = '';
+      } else {
+        toggle.style.display = 'none';
+      }
+    }
+
+    // 应用沉浸状态（图标 + class）
+    function applyImmersiveState(isHidden) {
+      if (isHidden) {
+        document.body.classList.add('head-foot-hidden');
+      } else {
+        document.body.classList.remove('head-foot-hidden');
+      }
+      if (expandIcon && collapseIcon) {
+        expandIcon.classList.toggle('hidden', isHidden);
+        collapseIcon.classList.toggle('hidden', !isHidden);
+      }
+      toggle.setAttribute('title', isHidden ? '显示导航' : '隐藏导航');
+      toggle.setAttribute('aria-label', isHidden ? '显示导航' : '隐藏导航');
+    }
+
+    // 切换沉浸模式
+    function toggleImmersive() {
+      var isHidden = document.body.classList.toggle('head-foot-hidden');
+      applyImmersiveState(isHidden);
+      // 保存状态到 sessionStorage，页面跳转后恢复
+      sessionStorage.setItem('maze-immersive', isHidden ? '1' : '0');
+    }
+
+    // 点击事件（拖拽时不触发切换）
+    toggle.addEventListener('click', function() {
+      if (toggle.dataset.immersiveDragged === 'true') return;
+      toggleImmersive();
+    });
+
+    // 页面加载时初始化
+    updateButtonVisibility();
+
+    // 恢复之前保存的沉浸状态（页面跳转后）
+    if (isMazePage()) {
+      var saved = sessionStorage.getItem('maze-immersive');
+      if (saved === '1') {
+        applyImmersiveState(true);
+      }
+    }
+
+    // 监听 popstate 以在浏览器前进/后退时更新
+    window.addEventListener('popstate', function() {
+      updateButtonVisibility();
+      var saved = sessionStorage.getItem('maze-immersive');
+      if (saved === '1' && isMazePage()) {
+        applyImmersiveState(true);
+      }
+    });
+  })();
+</script>

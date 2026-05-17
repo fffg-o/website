@@ -1,0 +1,36 @@
+---
+// ============================================================
+// 测试房间
+// ============================================================
+import MazeMap from "../../../components/MazeMap.astro";
+import type { RoomExport } from "../../../data/maze";
+import type { Portal } from "../../../data/maze";
+import { getMazeUrl } from "../../../lib/maze-url";
+
+/** 迷宫基础设施读取的导出数据 */
+export const room: RoomExport = {
+  id: "test",
+  portalSlots: [
+    { label: "", description: "" },
+    { label: "", description: "" },
+  ],
+};
+const { room: meta, baseUrl, portals: externalPortals } = Astro.props;
+function portalHref(targetId: string): string {
+  return `${baseUrl}${getMazeUrl(targetId)}?from=${meta.id}`;
+}
+---
+
+<MazeMap currentRoomId={meta.id} />
+
+<div class="blog-page">
+  <div class="puzzle-room" data-puzzle-id={meta.id}>
+    {
+      externalPortals.map((portal: Portal) => (
+        <a href={portalHref(portal.targetId)} class="room-portal-link">
+          test
+        </a>
+      ))
+    }
+  </div>
+</div>

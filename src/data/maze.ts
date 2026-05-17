@@ -25,9 +25,6 @@ export interface Portal {
 /**
  * 房间导出数据 —— 每个 _rooms/*.astro 必须导出此类型
  *
- * 迷宫基础设施只读取 id、portalSlots 和 portals。
- * title / description / date / tags 仅供迷宫列表页展示。
- *
  * portalSlots：只定义标签/描述，不定义目标房间。
  *   生成器读取槽位数量后随机分配 targetId。
  *
@@ -37,10 +34,6 @@ export interface Portal {
  */
 export interface RoomExport {
   id: string;
-  title: string;
-  description: string;
-  date: string;
-  tags: string[];
   /**
    * 传送门槽位：房间定义的模板，targetId 由构建脚本填充。
    * 仅定义 label/description，不定义目标房间。

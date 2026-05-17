@@ -31,48 +31,48 @@ export interface MazeConfig {
 }
 
 export const mazeConfig: MazeConfig = {
-  startRoomId: 'treasure',
+  startRoomId: 'final',
   nodes: [
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 32.3,
-    "y": 33.1
+    "x": 34.2,
+    "y": 36.7
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 36.1,
-    "y": 67.6
+    "x": 70.7,
+    "y": 65
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 72.2,
-    "y": 64.8
+    "x": 70,
+    "y": 28.8
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 67.5,
-    "y": 36.6
+    "x": 32.4,
+    "y": 65.3
   }
 ],
   edges: [
   {
     "source": "dark-passage",
-    "target": "treasure"
-  },
-  {
-    "source": "treasure",
     "target": "lockpick"
   },
   {
     "source": "dark-passage",
-    "target": "final"
+    "target": "treasure"
   },
   {
     "source": "lockpick",
+    "target": "final"
+  },
+  {
+    "source": "treasure",
     "target": "final"
   }
 ],
@@ -81,31 +81,31 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "通道尽头出现了一扇金色大门",
       "description": "门上刻着\"勇者\"二字",
-      "targetId": "treasure"
+      "targetId": "lockpick"
     },
     {
       "label": "墙上的裂缝透出微光",
       "description": "似乎通向另一个房间",
-      "targetId": "final"
+      "targetId": "treasure"
     }
   ],
   "final": [
     {
       "label": "🔁 回到起点重新开始",
       "description": "迷宫循环往复……",
-      "targetId": "dark-passage"
+      "targetId": "lockpick"
     },
     {
       "label": "一扇隐藏的秘门",
       "description": "似乎通向未知领域",
-      "targetId": "lockpick"
+      "targetId": "treasure"
     }
   ],
   "lockpick": [
     {
       "label": "石门缓缓打开，露出一个宝库入口",
       "description": "里面金光闪闪",
-      "targetId": "treasure"
+      "targetId": "dark-passage"
     },
     {
       "label": "旁边出现了一条黑暗的通道",
@@ -122,7 +122,7 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "墙壁上出现了一个暗格",
       "description": "似乎通向另一个空间",
-      "targetId": "lockpick"
+      "targetId": "final"
     }
   ],
   "minimal": [
@@ -145,6 +145,11 @@ export const mazeConfig: MazeConfig = {
       "label": "前往勇者试炼",
       "description": "最终挑战",
       "targetId": "final"
+    },
+    {
+      "label": "1",
+      "description": "1",
+      "targetId": "test"
     }
   ]
 },
@@ -178,43 +183,43 @@ export const mazeGraph: MazeGraph = {
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 32.3,
-    "y": 33.1
+    "x": 34.2,
+    "y": 36.7
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 36.1,
-    "y": 67.6
+    "x": 70.7,
+    "y": 65
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 72.2,
-    "y": 64.8
+    "x": 70,
+    "y": 28.8
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 67.5,
-    "y": 36.6
+    "x": 32.4,
+    "y": 65.3
   }
 ],
   edges: [
   {
     "from": "dark-passage",
-    "to": "treasure"
-  },
-  {
-    "from": "treasure",
     "to": "lockpick"
   },
   {
     "from": "dark-passage",
-    "to": "final"
+    "to": "treasure"
   },
   {
     "from": "lockpick",
+    "to": "final"
+  },
+  {
+    "from": "treasure",
     "to": "final"
   }
 ],
