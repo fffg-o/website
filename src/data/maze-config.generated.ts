@@ -31,49 +31,49 @@ export interface MazeConfig {
 }
 
 export const mazeConfig: MazeConfig = {
-  startRoomId: 'lockpick',
+  startRoomId: 'treasure',
   nodes: [
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 33.2,
-    "y": 35.2
+    "x": 32.3,
+    "y": 33.1
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 67.7,
-    "y": 33.6
+    "x": 36.1,
+    "y": 67.6
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 67.7,
-    "y": 71.7
+    "x": 72.2,
+    "y": 64.8
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 38.2,
-    "y": 71
+    "x": 67.5,
+    "y": 36.6
   }
 ],
   edges: [
   {
     "source": "dark-passage",
-    "target": "final"
-  },
-  {
-    "source": "dark-passage",
     "target": "treasure"
-  },
-  {
-    "source": "final",
-    "target": "lockpick"
   },
   {
     "source": "treasure",
     "target": "lockpick"
+  },
+  {
+    "source": "dark-passage",
+    "target": "final"
+  },
+  {
+    "source": "lockpick",
+    "target": "final"
   }
 ],
   portalsMap: {
@@ -81,12 +81,12 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "通道尽头出现了一扇金色大门",
       "description": "门上刻着\"勇者\"二字",
-      "targetId": "final"
+      "targetId": "treasure"
     },
     {
       "label": "墙上的裂缝透出微光",
       "description": "似乎通向另一个房间",
-      "targetId": "treasure"
+      "targetId": "final"
     }
   ],
   "final": [
@@ -105,12 +105,12 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "石门缓缓打开，露出一个宝库入口",
       "description": "里面金光闪闪",
-      "targetId": "final"
+      "targetId": "treasure"
     },
     {
       "label": "旁边出现了一条黑暗的通道",
       "description": "通道深处传来奇怪的回声",
-      "targetId": "treasure"
+      "targetId": "final"
     }
   ],
   "treasure": [
@@ -178,44 +178,44 @@ export const mazeGraph: MazeGraph = {
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 33.2,
-    "y": 35.2
+    "x": 32.3,
+    "y": 33.1
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 67.7,
-    "y": 33.6
+    "x": 36.1,
+    "y": 67.6
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 67.7,
-    "y": 71.7
+    "x": 72.2,
+    "y": 64.8
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 38.2,
-    "y": 71
+    "x": 67.5,
+    "y": 36.6
   }
 ],
   edges: [
   {
     "from": "dark-passage",
-    "to": "final"
-  },
-  {
-    "from": "dark-passage",
     "to": "treasure"
-  },
-  {
-    "from": "final",
-    "to": "lockpick"
   },
   {
     "from": "treasure",
     "to": "lockpick"
+  },
+  {
+    "from": "dark-passage",
+    "to": "final"
+  },
+  {
+    "from": "lockpick",
+    "to": "final"
   }
 ],
 };
