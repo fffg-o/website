@@ -18,42 +18,42 @@ export interface MazeConfigEdge {
 }
 
 export interface MazeConfig {
-  /** 起点房间 ID */
+  /** 起点房间 ID（每次构建随机变化） */
   startRoomId: string;
   /** 所有房间节点（含画布坐标） */
   nodes: MazeConfigNode[];
-  /** 房间之间的连接 */
+  /** 房间之间的连接（由槽位分配决定） */
   edges: MazeConfigEdge[];
-  /** 每个房间的传送门映射 */
+  /** 每个房间的传送门映射（生成器基于槽位随机分配 targetId） */
   portalsMap: Record<string, Portal[]>;
 }
 
 export const mazeConfig: MazeConfig = {
-  startRoomId: 'dark-passage',
+  startRoomId: 'lockpick',
   nodes: [
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 30.5,
-    "y": 29
+    "x": 37.1,
+    "y": 29.8
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 68.9,
-    "y": 37.3
+    "x": 67.8,
+    "y": 39.2
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 35.7,
-    "y": 68.4
+    "x": 37.8,
+    "y": 60.6
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 63.4,
-    "y": 70.2
+    "x": 67.4,
+    "y": 64.4
   }
 ],
   edges: [
@@ -70,71 +70,79 @@ export const mazeConfig: MazeConfig = {
     "target": "treasure"
   },
   {
-    "source": "dark-passage",
-    "target": "treasure"
-  },
-  {
-    "source": "lockpick",
-    "target": "treasure"
+    "source": "treasure",
+    "target": "lockpick"
   }
 ],
   portalsMap: {
   "dark-passage": [
     {
-      "label": "藤蔓覆盖的拱门",
-      "description": "通往 勇者试炼",
+      "label": "通道尽头出现了一扇金色大门",
+      "description": "门上刻着\"勇者\"二字",
       "targetId": "final"
     },
     {
-      "label": "闪烁的传送门",
-      "description": "通往 符文之门",
+      "label": "墙上的裂缝透出微光",
+      "description": "似乎通向另一个房间",
       "targetId": "lockpick"
-    },
-    {
-      "label": "雕花的木门",
-      "description": "通往 宝藏密室",
-      "targetId": "treasure"
     }
   ],
   "final": [
     {
-      "label": "藤蔓覆盖的拱门",
-      "description": "通往 黑暗通道",
+      "label": "🔁 回到起点重新开始",
+      "description": "迷宫循环往复……",
       "targetId": "dark-passage"
     },
     {
-      "label": "旋转的魔法漩涡",
-      "description": "通往 宝藏密室",
+      "label": "一扇隐藏的秘门",
+      "description": "似乎通向未知领域",
       "targetId": "treasure"
     }
   ],
   "lockpick": [
     {
-      "label": "闪烁的传送门",
-      "description": "通往 黑暗通道",
+      "label": "石门缓缓打开，露出一个宝库入口",
+      "description": "里面金光闪闪",
       "targetId": "dark-passage"
     },
     {
-      "label": "符文环绕的入口",
-      "description": "通往 宝藏密室",
+      "label": "旁边出现了一条黑暗的通道",
+      "description": "通道深处传来奇怪的回声",
       "targetId": "treasure"
     }
   ],
   "treasure": [
     {
-      "label": "旋转的魔法漩涡",
-      "description": "通往 勇者试炼",
+      "label": "回到来时路",
+      "description": "身后的门还未关闭",
       "targetId": "final"
     },
     {
-      "label": "雕花的木门",
-      "description": "通往 黑暗通道",
+      "label": "墙壁上出现了一个暗格",
+      "description": "似乎通向另一个空间",
+      "targetId": "lockpick"
+    }
+  ],
+  "minimal": [
+    {
+      "label": "前往符文之门",
+      "description": "第一个迷宫房间",
+      "targetId": "lockpick"
+    },
+    {
+      "label": "前往宝藏密室",
+      "description": "寻宝之旅",
+      "targetId": "treasure"
+    },
+    {
+      "label": "前往黑暗通道",
+      "description": "探索未知",
       "targetId": "dark-passage"
     },
     {
-      "label": "符文环绕的入口",
-      "description": "通往 符文之门",
-      "targetId": "lockpick"
+      "label": "前往勇者试炼",
+      "description": "最终挑战",
+      "targetId": "final"
     }
   ]
 },

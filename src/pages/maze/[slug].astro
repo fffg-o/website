@@ -16,7 +16,6 @@ import type { RoomExport, Portal } from '../../data/maze';
 import { mazeConfig } from '../../data/maze-config.generated';
 
 // 静态导入所有房间组件（Astro 需要静态引用才能渲染）
-import Welcome from './_rooms/welcome.astro';
 import Lockpick from './_rooms/lockpick.astro';
 import Treasure from './_rooms/treasure.astro';
 import DarkPassage from './_rooms/dark-passage.astro';
@@ -43,14 +42,13 @@ const { room } = Astro.props;
 const base = import.meta.env.BASE_URL;
 
 // 从生成的迷宫配置中读取传送门
-// 如果配置中不存在该房间，回退到 room.portals
-const portals: Portal[] = mazeConfig.portalsMap[room.id] ?? room.portals;
+// portalSlots 只定义标签/描述，实际 targetId 由 generate-maze 随机分配
+const portals: Portal[] = mazeConfig.portalsMap[room.id] ?? [];
 // 谜题房间：将配置中的第一个 portal 作为 nextPortal（解谜后展示）
 const nextPortal: Portal | undefined = portals.length > 0 ? portals[0] : undefined;
 ---
 
 <!-- 委托给对应的房间页面组件渲染 -->
-{room.id === 'welcome' && <Welcome room={room} baseUrl={base} portals={portals} />}
 {room.id === 'lockpick' && <Lockpick room={room} baseUrl={base} portals={portals} nextPortal={nextPortal} />}
 {room.id === 'treasure' && <Treasure room={room} baseUrl={base} portals={portals} nextPortal={nextPortal} />}
 {room.id === 'dark-passage' && <DarkPassage room={room} baseUrl={base} portals={portals} nextPortal={nextPortal} />}

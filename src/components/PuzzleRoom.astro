@@ -17,7 +17,8 @@ interface Props {
 const { room, baseUrl, portals: externalPortals } = Astro.props;
 
 /** 实际用于渲染的传送门列表 */
-const displayPortals = externalPortals ?? room.portals;
+// portalSlots 只定义标签/描述，targetId 由 generate-maze 分配并传入 portals prop
+const displayPortals = externalPortals ?? [];
 
 function portalHref(targetId: string): string {
   return `${baseUrl}/maze/${encryptSlug(targetId)}?from=${room.id}`;

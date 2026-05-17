@@ -17,6 +17,13 @@ export const room: RoomExport = {
   description: '纯开发用途，只有一个跳转链接。',
   date: '2026-05-13',
   tags: ['迷宫', '开发'],
+  portalSlots: [
+    { label: '前往符文之门', description: '第一个迷宫房间' },
+    { label: '前往宝藏密室', description: '寻宝之旅' },
+    { label: '前往黑暗通道', description: '探索未知' },
+    { label: '前往勇者试炼', description: '最终挑战' },
+  ],
+  /** 固定传送门，不由生成器随机分配 */
   portals: [
     { label: '前往符文之门', description: '第一个迷宫房间', targetId: 'lockpick' },
     { label: '前往宝藏密室', description: '寻宝之旅', targetId: 'treasure' },
@@ -47,7 +54,7 @@ function portalHref(targetId: string): string {
       <p class="minimal-desc">{meta.description}</p>
       <div class="minimal-links">
         {
-          meta.portals.map((portal) => (
+          portals.map((portal) => (
             <a href={portalHref(portal.targetId)} class="minimal-link">
               <span class="minimal-link-label">{portal.label}</span>
               {portal.description && <span class="minimal-link-desc">{portal.description}</span>}
