@@ -1,0 +1,851 @@
+---
+import MazeMap from "../../../components/MazeMap.astro";
+import type { RoomExport } from "../../../data/maze";
+import type { Portal } from "../../../data/maze";
+import { getMazeUrl } from "../../../lib/maze-url";
+export const room: RoomExport = {
+  id: "lights-out",
+  portalSlots: [
+    { label: "", description: "" },
+    { label: "", description: "" },
+  ],
+};
+
+interface Props {
+  room: RoomExport;
+  baseUrl: string;
+  portals: Portal[];
+}
+const { room: meta, baseUrl, portals: externalPortals } = Astro.props;
+
+function portalHref(targetId: string): string {
+  return `${baseUrl}${getMazeUrl(targetId)}?from=${meta.id}`;
+}
+---
+
+<MazeMap currentRoomId={meta.id} />
+<div class="blog-page">
+  <article class="blog-article prose prose-zinc dark:prose-invert">
+    <div class="puzzle-room" data-puzzle-id={meta.id}>
+      <div class="puzzle-area" id="puzzle-area">
+        <div class="lights-grid" id="lights-grid"></div>
+        <div class="lights-controls">
+          <button class="puzzle-btn puzzle-btn-secondary" id="reset-btn"
+            >🔄</button
+          >
+        </div>
+      </div>
+
+      <!-- 金色传送门 - 全部亮起 -->
+      <div class="room-portals" id="room-portals-on" style="display:none">
+        <div class="room-portals-glow portal-glow-on"></div>
+        <div class="room-portals-content">
+          <div class="portal-visual portal-visual-on">
+            <svg viewBox="0 0 100 100" class="portal-svg">
+              <defs>
+                <radialGradient id="portal-glow-on" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.8"></stop>
+                  <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.3"></stop>
+                  <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"></stop>
+                </radialGradient>
+              </defs>
+              <circle cx="50" cy="50" r="45" fill="url(#portal-glow-on)" class="portal-pulse">
+                <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
+              </circle>
+              <circle cx="50" cy="50" r="20" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.6">
+                <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
+                <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
+              </circle>
+              <circle cx="50" cy="50" r="10" fill="none" stroke="#fde68a" stroke-width="1.5" opacity="0.4">
+                <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
+                <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
+              </circle>
+              <text x="50" y="55" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="bold">✦</text>
+            </svg>
+          </div>
+          <div class="room-portals-list">
+            {
+              externalPortals
+                .filter((_, i) => i === 0)
+                .map((portal: Portal) => (
+                  <a
+                    href={portalHref(portal.targetId)}
+                    class="room-portal-link portal-link-on"
+                  >
+                    <span class="room-portal-icon">✨</span>
+                    <span class="room-portal-arrow">→</span>
+                  </a>
+                ))
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- 蓝色传送门 - 全部熄灭 -->
+      <div class="room-portals" id="room-portals-off" style="display:none">
+        <div class="room-portals-glow portal-glow-off"></div>
+        <div class="room-portals-content">
+          <div class="portal-visual portal-visual-off">
+            <svg viewBox="0 0 100 100" class="portal-svg">
+              <defs>
+                <radialGradient id="portal-glow-off" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.8"></stop>
+                  <stop offset="60%" stop-color="#3b82f6" stop-opacity="0.3"></stop>
+                  <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
+                </radialGradient>
+              </defs>
+              <circle cx="50" cy="50" r="45" fill="url(#portal-glow-off)" class="portal-pulse">
+                <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
+              </circle>
+              <circle cx="50" cy="50" r="20" fill="none" stroke="#60a5fa" stroke-width="2" opacity="0.6">
+                <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
+                <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
+              </circle>
+              <circle cx="50" cy="50" r="10" fill="none" stroke="#93c5fd" stroke-width="1.5" opacity="0.4">
+                <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
+                <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
+              </circle>
+              <text x="50" y="55" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">🌙</text>
+            </svg>
+          </div>
+          <div class="room-portals-list">
+            {
+              externalPortals
+                .filter((_, i) => i === 1)
+                .map((portal: Portal) => (
+                  <a
+                    href={portalHref(portal.targetId)}
+                    class="room-portal-link portal-link-off"
+                  >
+                    <span class="room-portal-icon">🌙</span>
+                    <span class="room-portal-arrow">→</span>
+                  </a>
+                ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+  <aside class="blog-toc-sidebar"></aside>
+</div>
+
+<style is:global>
+  /* ===== 关灯游戏专属样式 ===== */
+
+  .lights-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.875rem;
+    padding: 1.75rem;
+    margin: 1rem auto;
+    background: color-mix(in srgb, var(--color-border) 30%, transparent);
+    border-radius: 1.5rem;
+    max-width: 640px;
+    width: 100%;
+    aspect-ratio: 1;
+  }
+
+  .light-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    background: transparent;
+    padding: 0;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .light-cell:hover {
+    transform: scale(1.08);
+  }
+
+  .light-cell:active {
+    transform: scale(0.92);
+  }
+
+  .light-cell:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-primary);
+    border-radius: 50%;
+  }
+
+  .light-bulb {
+    display: block;
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+
+  /* ===== 灯亮状态 ===== */
+  .light-cell.on .light-bulb {
+    background: radial-gradient(
+      circle at 35% 35%,
+      #fef08a,
+      #f59e0b 50%,
+      #d97706
+    );
+    box-shadow:
+      0 0 16px 6px rgba(251, 191, 36, 0.5),
+      0 0 40px 15px rgba(251, 191, 36, 0.25),
+      0 0 80px 30px rgba(251, 191, 36, 0.1);
+  }
+
+  .light-cell.on .light-bulb::after {
+    content: "";
+    position: absolute;
+    top: 12%;
+    left: 22%;
+    width: 35%;
+    height: 25%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* ===== 灯灭状态（亮色模式） ===== */
+  .light-cell.off .light-bulb {
+    background: radial-gradient(
+      circle at 35% 35%,
+      #e4e4e7,
+      #d4d4d8 60%,
+      #a1a1aa
+    );
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.1),
+      0 0 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .light-cell.off .light-bulb::after {
+    content: "";
+    position: absolute;
+    top: 12%;
+    left: 22%;
+    width: 35%;
+    height: 25%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* ===== 灯灭状态（暗色模式） ===== */
+  .dark .light-cell.off .light-bulb {
+    background: radial-gradient(
+      circle at 35% 35%,
+      #3f3f46,
+      #27272a 60%,
+      #18181b
+    );
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.3),
+      0 0 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark .light-cell.off .light-bulb::after {
+    content: "";
+    position: absolute;
+    top: 12%;
+    left: 22%;
+    width: 35%;
+    height: 25%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* ===== 点击涟漪效果 ===== */
+  .light-cell .ripple-effect {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 3px solid var(--color-primary);
+    opacity: 0;
+    animation: ripple-out 0.5s ease-out forwards;
+    pointer-events: none;
+  }
+
+  @keyframes ripple-out {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1.3);
+      opacity: 0;
+    }
+  }
+
+  /* ===== 操作按钮区域 ===== */
+  .lights-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+
+  /* ===== 按钮基础样式 ===== */
+  .puzzle-btn {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    align-self: flex-start;
+    letter-spacing: 0.02em;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .puzzle-btn-secondary {
+    background: color-mix(in srgb, var(--color-border) 45%, transparent);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .puzzle-btn-secondary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0.875rem;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary) 15%, transparent),
+      transparent 50%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .puzzle-btn-secondary:hover {
+    background: color-mix(in srgb, var(--color-border) 70%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.1),
+      0 0 20px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  }
+
+  .puzzle-btn-secondary:hover::before {
+    opacity: 1;
+  }
+
+  .puzzle-btn-secondary:active {
+    transform: translateY(0) scale(0.97);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .puzzle-btn-secondary:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ===== 传送门视觉 ===== */
+  .portal-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+  }
+
+  .portal-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.15));
+  }
+
+  .portal-visual-off .portal-svg {
+    filter: drop-shadow(0 0 30px rgba(96, 165, 250, 0.15));
+  }
+
+  .portal-pulse {
+    animation: portal-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes portal-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  /* ===== 传送门发光条 ===== */
+  .portal-glow-on {
+    background: linear-gradient(
+      90deg,
+      #f59e0b,
+      #fbbf24,
+      #fde68a,
+      #f59e0b
+    ) !important;
+    background-size: 300% 100% !important;
+    animation: glow-shimmer 3s linear infinite !important;
+  }
+
+  .portal-glow-off {
+    background: linear-gradient(
+      90deg,
+      #3b82f6,
+      #60a5fa,
+      #93c5fd,
+      #3b82f6
+    ) !important;
+    background-size: 300% 100% !important;
+    animation: glow-shimmer 3s linear infinite !important;
+  }
+
+  @keyframes glow-shimmer {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 300% 50%;
+    }
+  }
+
+  /* ===== 传送门容器进出动画 ===== */
+  .room-portals {
+    animation: portal-appear 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes portal-appear {
+    0% {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ===== 传送门列表 ===== */
+  .room-portals-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  /* ===== 传送门链接 - 纯图标，无背景 ===== */
+  .room-portal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    background: transparent !important;
+    border: 1px solid transparent;
+  }
+
+  .room-portal-link:hover {
+    transform: translateX(4px) scale(1.05);
+  }
+
+  .room-portal-link:active {
+    transform: translateX(2px) scale(0.97);
+  }
+
+  .room-portal-link:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  }
+
+  .room-portal-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .room-portal-link:hover .room-portal-icon {
+    transform: scale(1.2) rotate(-8deg);
+  }
+
+  .room-portal-arrow {
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .room-portal-link:hover .room-portal-arrow {
+    transform: translateX(5px);
+  }
+
+  /* 金色传送门链接 */
+  .portal-link-on {
+    color: #fbbf24;
+  }
+
+  .portal-link-on:hover {
+    color: #fde68a;
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+  }
+
+  .portal-link-on .room-portal-arrow {
+    color: #fbbf24;
+  }
+
+  /* 蓝色传送门链接 */
+  .portal-link-off {
+    color: #60a5fa;
+  }
+
+  .portal-link-off:hover {
+    color: #93c5fd;
+    text-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+  }
+
+  .portal-link-off .room-portal-arrow {
+    color: #60a5fa;
+  }
+
+  /* ===== 胜利动画 - 粒子爆发 ===== */
+  .win-particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    border-radius: 50%;
+    animation: particle-fly ease-out forwards;
+  }
+
+  @keyframes particle-fly {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--tx), var(--ty)) scale(0) rotate(720deg);
+    }
+  }
+
+  /* ===== 移动端适配 ===== */
+  @media (max-width: 639px) {
+    .lights-grid {
+      gap: 0.5rem;
+      padding: 1rem;
+      max-width: 420px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .lights-grid {
+      gap: 0.375rem;
+      padding: 0.75rem;
+      max-width: 330px;
+    }
+  }
+</style>
+
+<script>
+  // @ts-nocheck
+  (function () {
+    // ============================================================
+    // 关灯游戏核心逻辑
+    // ============================================================
+
+    var GRID_SIZE = 5;
+    var grid = [];
+    var moves = 0;
+    var isSolved = false;
+
+    var gridEl = document.getElementById("lights-grid");
+    var movesEl = document.getElementById("moves-count");
+    var resetBtn = document.getElementById("reset-btn");
+    var puzzleArea = document.getElementById("puzzle-area");
+
+    // ===== 工具函数 =====
+
+    /** 创建初始状态（全部关闭） */
+    function createEmptyGrid() {
+      return Array.from({ length: GRID_SIZE }, function () {
+        return Array.from({ length: GRID_SIZE }, function () {
+          return 0;
+        });
+      });
+    }
+
+    /** 生成可解谜题（从全关状态随机点击，保证可解） */
+    function generatePuzzle() {
+      var g = createEmptyGrid();
+      var steps = 8 + Math.floor(Math.random() * 8);
+      for (var i = 0; i < steps; i++) {
+        var r = Math.floor(Math.random() * GRID_SIZE);
+        var c = Math.floor(Math.random() * GRID_SIZE);
+        toggleCell(g, r, c);
+      }
+      // 极小概率生成全亮/全灭，重试
+      if (isAllOn(g) || isAllOff(g)) {
+        return generatePuzzle();
+      }
+      return g;
+    }
+
+    /** 检查是否全部亮起 */
+    function isAllOn(g) {
+      for (var r = 0; r < GRID_SIZE; r++) {
+        for (var c = 0; c < GRID_SIZE; c++) {
+          if (g[r][c] === 0) return false;
+        }
+      }
+      return true;
+    }
+
+    /** 检查是否全部熄灭 */
+    function isAllOff(g) {
+      for (var r = 0; r < GRID_SIZE; r++) {
+        for (var c = 0; c < GRID_SIZE; c++) {
+          if (g[r][c] === 1) return false;
+        }
+      }
+      return true;
+    }
+
+    /** 切换指定格及其上下左右邻居 */
+    function toggleCell(g, row, col) {
+      var dirs = [
+        [0, 0],
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [0, 1],
+      ];
+      for (var d = 0; d < dirs.length; d++) {
+        var nr = row + dirs[d][0];
+        var nc = col + dirs[d][1];
+        if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+          g[nr][nc] = g[nr][nc] === 1 ? 0 : 1;
+        }
+      }
+    }
+
+    // ===== 渲染 =====
+
+    /** 渲染网格 */
+    function renderGrid() {
+      if (!gridEl) return;
+      gridEl.innerHTML = "";
+
+      for (var r = 0; r < GRID_SIZE; r++) {
+        for (var c = 0; c < GRID_SIZE; c++) {
+          var cell = document.createElement("button");
+          cell.className = "light-cell " + (grid[r][c] === 1 ? "on" : "off");
+          cell.dataset.row = String(r);
+          cell.dataset.col = String(c);
+          cell.setAttribute(
+            "aria-label",
+            "灯 " +
+              (r + 1) +
+              "-" +
+              (c + 1) +
+              ": " +
+              (grid[r][c] === 1 ? "亮" : "灭"),
+          );
+
+          var bulb = document.createElement("span");
+          bulb.className = "light-bulb";
+          cell.appendChild(bulb);
+
+          cell.addEventListener("click", handleCellClick);
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    /** 更新单个灯的状态（动画方式） */
+    function updateCell(row, col) {
+      if (!gridEl) return;
+      var index = row * GRID_SIZE + col;
+      var cell = gridEl.children[index];
+      if (!cell) return;
+      var isOn = grid[row][col] === 1;
+      cell.className = "light-cell " + (isOn ? "on" : "off");
+      cell.setAttribute(
+        "aria-label",
+        "灯 " + (row + 1) + "-" + (col + 1) + ": " + (isOn ? "亮" : "灭"),
+      );
+
+      // 添加点击涟漪效果
+      var ripple = document.createElement("span");
+      ripple.className = "ripple-effect";
+      cell.appendChild(ripple);
+      setTimeout(function () {
+        ripple.remove();
+      }, 500);
+    }
+
+    // ===== 粒子特效 =====
+
+    function fireParticles(color1, color2) {
+      var colors = [color1, color2, "#fbbf24", "#f472b6", "#34d399", "#818cf8"];
+      for (var i = 0; i < 60; i++) {
+        var p = document.createElement("div");
+        p.className = "win-particle";
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var size = 3 + Math.random() * 8;
+        var angle = Math.random() * 360;
+        var dist = 80 + Math.random() * 200;
+        var tx = Math.cos((angle * Math.PI) / 180) * dist;
+        var ty = Math.sin((angle * Math.PI) / 180) * dist;
+        var dur = 1 + Math.random() * 1.5;
+        var delay = Math.random() * 0.4;
+        p.style.cssText = [
+          "left: 50%",
+          "top: 50%",
+          "width: " + size + "px",
+          "height: " + size + "px",
+          "background: " + color,
+          "--tx: " + tx + "px",
+          "--ty: " + ty + "px",
+          "animation-duration: " + dur + "s",
+          "animation-delay: " + delay + "s",
+          "border-radius: " + (Math.random() > 0.5 ? "50%" : "2px"),
+        ].join(";");
+        document.body.appendChild(p);
+        setTimeout(
+          function () {
+            p.remove();
+          },
+          (dur + delay) * 1000 + 100,
+        );
+      }
+    }
+
+    // ===== 游戏逻辑 =====
+
+    function handleCellClick(e) {
+      if (isSolved) return;
+      var cell = e.currentTarget;
+      if (!cell) return;
+      var row = parseInt(cell.dataset.row, 10);
+      var col = parseInt(cell.dataset.col, 10);
+
+      // 切换状态
+      toggleCell(grid, row, col);
+      moves++;
+      if (movesEl) movesEl.textContent = String(moves);
+
+      // 更新被影响的 5 个格子
+      var dirs = [
+        [0, 0],
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [0, 1],
+      ];
+      for (var d = 0; d < dirs.length; d++) {
+        var nr = row + dirs[d][0];
+        var nc = col + dirs[d][1];
+        if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+          updateCell(nr, nc);
+        }
+      }
+
+      checkWin();
+    }
+
+    function checkWin() {
+      if (isAllOn(grid)) {
+        isSolved = true;
+        if (puzzleArea) {
+          puzzleArea.style.transition =
+            "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)";
+          puzzleArea.style.opacity = "0";
+          puzzleArea.style.transform = "translateY(-20px)";
+          setTimeout(function () {
+            puzzleArea.style.display = "none";
+          }, 600);
+        }
+        fireParticles("#fbbf24", "#f59e0b");
+        setTimeout(function () {
+          var portals = document.getElementById("room-portals-on");
+          if (portals) {
+            portals.style.display = "block";
+            setTimeout(function () {
+              portals.classList.add("room-portals-visible");
+            }, 50);
+          }
+        }, 700);
+        return;
+      }
+
+      if (isAllOff(grid)) {
+        isSolved = true;
+        if (puzzleArea) {
+          puzzleArea.style.transition =
+            "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)";
+          puzzleArea.style.opacity = "0";
+          puzzleArea.style.transform = "translateY(-20px)";
+          setTimeout(function () {
+            puzzleArea.style.display = "none";
+          }, 600);
+        }
+        fireParticles("#60a5fa", "#3b82f6");
+        setTimeout(function () {
+          var portals = document.getElementById("room-portals-off");
+          if (portals) {
+            portals.style.display = "block";
+            setTimeout(function () {
+              portals.classList.add("room-portals-visible");
+            }, 50);
+          }
+        }, 700);
+        return;
+      }
+    }
+
+    function resetGame() {
+      isSolved = false;
+      moves = 0;
+      if (movesEl) movesEl.textContent = "0";
+
+      if (puzzleArea) {
+        puzzleArea.style.display = "";
+        puzzleArea.style.opacity = "";
+        puzzleArea.style.transform = "";
+      }
+
+      var portalsOn = document.getElementById("room-portals-on");
+      var portalsOff = document.getElementById("room-portals-off");
+      if (portalsOn) {
+        portalsOn.style.display = "none";
+        portalsOn.classList.remove("room-portals-visible");
+      }
+      if (portalsOff) {
+        portalsOff.style.display = "none";
+        portalsOff.classList.remove("room-portals-visible");
+      }
+
+      grid = generatePuzzle();
+      renderGrid();
+    }
+
+    // ===== 初始化 =====
+
+    grid = generatePuzzle();
+    renderGrid();
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", resetGame);
+    }
+  })();
+</script>
