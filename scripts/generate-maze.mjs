@@ -72,7 +72,8 @@ class SeededRandom {
  * 从 _rooms 目录中扫描所有房间文件
  * @returns {string[]} 房间 ID 数组
  */
-function scanRoomIds() {
+function scanRoomIds(options = {}) {
+  const { exclude = []}  = options;
   if (!existsSync(ROOMS_DIR)) {
     console.error(`❌ 房间目录不存在: ${ROOMS_DIR}`);
     process.exit(1);
@@ -82,6 +83,7 @@ function scanRoomIds() {
   const roomIds = files
     .filter((f) => f.endsWith('.astro'))
     .map((f) => f.replace(/\.astro$/, ''))
+    .filter((id) => !exclude.includes(id))  // 排除指定的房间 ID
     .sort();
 
   if (roomIds.length === 0) {
@@ -388,7 +390,7 @@ function main() {
   console.log('🏗️  开始生成迷宫配置...\n');
 
   // 1. 扫描房间
-  const roomIds = scanRoomIds();
+  const roomIds = scanRoomIds({ exclude: ['welcome','minimal']} ); //排除起始房间
   console.log(`📁 发现 ${roomIds.length} 个房间:`);
   roomIds.forEach((id) => console.log(`   - ${id}`));
   console.log('');
