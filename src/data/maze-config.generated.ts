@@ -3,7 +3,9 @@
 // 请勿手动修改！每次构建都会重新生成。
 // ============================================================
 
-import type { Portal } from '../types/maze';
+import type { Portal } from '../data/maze';
+
+// ---- MazeConfig（供路由/传送门使用） ----
 
 export interface MazeConfigNode {
   id: string;
@@ -34,26 +36,26 @@ export const mazeConfig: MazeConfig = {
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 37.1,
-    "y": 29.8
+    "x": 33.2,
+    "y": 35.2
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 67.8,
-    "y": 39.2
+    "x": 67.7,
+    "y": 33.6
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 37.8,
-    "y": 60.6
+    "x": 67.7,
+    "y": 71.7
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 67.4,
-    "y": 64.4
+    "x": 38.2,
+    "y": 71
   }
 ],
   edges: [
@@ -63,11 +65,11 @@ export const mazeConfig: MazeConfig = {
   },
   {
     "source": "dark-passage",
-    "target": "lockpick"
+    "target": "treasure"
   },
   {
     "source": "final",
-    "target": "treasure"
+    "target": "lockpick"
   },
   {
     "source": "treasure",
@@ -84,7 +86,7 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "墙上的裂缝透出微光",
       "description": "似乎通向另一个房间",
-      "targetId": "lockpick"
+      "targetId": "treasure"
     }
   ],
   "final": [
@@ -96,14 +98,14 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "一扇隐藏的秘门",
       "description": "似乎通向未知领域",
-      "targetId": "treasure"
+      "targetId": "lockpick"
     }
   ],
   "lockpick": [
     {
       "label": "石门缓缓打开，露出一个宝库入口",
       "description": "里面金光闪闪",
-      "targetId": "dark-passage"
+      "targetId": "final"
     },
     {
       "label": "旁边出现了一条黑暗的通道",
@@ -115,7 +117,7 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "回到来时路",
       "description": "身后的门还未关闭",
-      "targetId": "final"
+      "targetId": "dark-passage"
     },
     {
       "label": "墙壁上出现了一个暗格",
@@ -146,4 +148,74 @@ export const mazeConfig: MazeConfig = {
     }
   ]
 },
+};
+
+// ---- MazeGraph（供 MazeMap 地图组件使用） ----
+
+export interface MazeGraphNode {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface MazeGraphEdge {
+  from: string;
+  to: string;
+}
+
+export interface MazeGraph {
+  nodes: MazeGraphNode[];
+  edges: MazeGraphEdge[];
+}
+
+/**
+ * 迷宫地图数据 —— 与 maze-config 数据同源，
+ * 仅边格式使用 from/to（与 MazeGraph 类型兼容）。
+ */
+export const mazeGraph: MazeGraph = {
+  nodes: [
+  {
+    "id": "dark-passage",
+    "label": "黑暗通道",
+    "x": 33.2,
+    "y": 35.2
+  },
+  {
+    "id": "final",
+    "label": "勇者试炼",
+    "x": 67.7,
+    "y": 33.6
+  },
+  {
+    "id": "lockpick",
+    "label": "符文之门",
+    "x": 67.7,
+    "y": 71.7
+  },
+  {
+    "id": "treasure",
+    "label": "宝藏密室",
+    "x": 38.2,
+    "y": 71
+  }
+],
+  edges: [
+  {
+    "from": "dark-passage",
+    "to": "final"
+  },
+  {
+    "from": "dark-passage",
+    "to": "treasure"
+  },
+  {
+    "from": "final",
+    "to": "lockpick"
+  },
+  {
+    "from": "treasure",
+    "to": "lockpick"
+  }
+],
 };

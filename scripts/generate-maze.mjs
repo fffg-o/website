@@ -452,12 +452,24 @@ function generateConfigContent(startRoomId, nodes, edges, portalsMap) {
   const edgesJson = JSON.stringify(edges, null, 2);
   const portalsMapJson = JSON.stringify(portalsMap, null, 2);
 
+  // 同时生成 MazeGraph 格式（from/to 格式的边，供 MazeMap 使用）
+  const mazeGraphNodesJson = JSON.stringify(
+    nodes.map((n) => ({ id: n.id, label: n.label, x: n.x, y: n.y })),
+    null, 2,
+  );
+  const mazeGraphEdgesJson = JSON.stringify(
+    edges.map((e) => ({ from: e.source, to: e.target })),
+    null, 2,
+  );
+
   return `// ============================================================
 // 迷宫配置文件 —— 由 scripts/generate-maze.mjs 自动生成
 // 请勿手动修改！每次构建都会重新生成。
 // ============================================================
 
-import type { Portal } from '../types/maze';
+import type { Portal } from '../data/maze';
+
+// ---- MazeConfig（供路由/传送门使用） ----
 
 export interface MazeConfigNode {
   id: string;
@@ -487,6 +499,34 @@ export const mazeConfig: MazeConfig = {
   nodes: ${nodesJson},
   edges: ${edgesJson},
   portalsMap: ${portalsMapJson},
+};
+
+// ---- MazeGraph（供 MazeMap 地图组件使用） ----
+
+export interface MazeGraphNode {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface MazeGraphEdge {
+  from: string;
+  to: string;
+}
+
+export interface MazeGraph {
+  nodes: MazeGraphNode[];
+  edges: MazeGraphEdge[];
+}
+
+/**
+ * 迷宫地图数据 —— 与 maze-config 数据同源，
+ * 仅边格式使用 from/to（与 MazeGraph 类型兼容）。
+ */
+export const mazeGraph: MazeGraph = {
+  nodes: ${mazeGraphNodesJson},
+  edges: ${mazeGraphEdgesJson},
 };
 `;
 }

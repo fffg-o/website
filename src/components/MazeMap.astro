@@ -10,9 +10,10 @@
 // 1. 每次进入迷宫（新标签页/会话）清除旧地图数据，重新记录
 // 2. 地图组件可拖拽移动位置 + 自由缩放窗口大小
 // 3. 沉浸式切换按钮可拖拽移动位置
-// 4. 兼容性：地图数据来源自 maze-map.ts，新增房间页面无需修改本组件
+// 4. 兼容性：地图数据来源自 maze-config.generated.ts（由 generate-maze.mjs 自动生成），
+//    新增房间页面无需修改本组件
 // ============================================================
-import { mazeGraph, VISITED_ROOMS_KEY, getNodeById } from '../data/maze-map';
+import { mazeGraph } from '../data/maze-config.generated';
 
 interface Props {
   /** 当前房间 ID */
