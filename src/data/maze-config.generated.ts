@@ -31,69 +31,69 @@ export interface MazeConfig {
 }
 
 export const mazeConfig: MazeConfig = {
-  startRoomId: 'final',
+  startRoomId: 'dark-passage',
   nodes: [
   {
     "id": "conway",
     "label": "Conway",
-    "x": 27,
-    "y": 38.8
+    "x": 26.7,
+    "y": 38.2
   },
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 51.3,
-    "y": 65.2
+    "x": 54.9,
+    "y": 27.8
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 70.8,
-    "y": 62.5
+    "x": 79.2,
+    "y": 37
   },
   {
     "id": "lights-out",
     "label": "Lights Out",
-    "x": 27.5,
-    "y": 69.1
+    "x": 72.9,
+    "y": 72.5
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 53.9,
-    "y": 31.6
+    "x": 27.4,
+    "y": 63.3
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 76.1,
-    "y": 27.5
+    "x": 45.3,
+    "y": 64.6
   }
 ],
   edges: [
   {
     "source": "conway",
+    "target": "dark-passage"
+  },
+  {
+    "source": "conway",
+    "target": "final"
+  },
+  {
+    "source": "dark-passage",
     "target": "lockpick"
+  },
+  {
+    "source": "final",
+    "target": "treasure"
   },
   {
     "source": "lockpick",
     "target": "lights-out"
   },
   {
-    "source": "conway",
-    "target": "treasure"
-  },
-  {
-    "source": "lights-out",
-    "target": "final"
-  },
-  {
     "source": "treasure",
-    "target": "dark-passage"
-  },
-  {
-    "source": "final",
-    "target": "dark-passage"
+    "target": "lights-out"
   }
 ],
   portalsMap: {
@@ -101,36 +101,36 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "",
       "description": "",
-      "targetId": "lockpick"
+      "targetId": "dark-passage"
     },
     {
       "label": "",
       "description": "",
-      "targetId": "treasure"
+      "targetId": "final"
     }
   ],
   "dark-passage": [
     {
       "label": "通道尽头出现了一扇金色大门",
       "description": "门上刻着\"勇者\"二字",
-      "targetId": "treasure"
+      "targetId": "conway"
     },
     {
       "label": "墙上的裂缝透出微光",
       "description": "似乎通向另一个房间",
-      "targetId": "final"
+      "targetId": "lockpick"
     }
   ],
   "final": [
     {
       "label": "🔁 回到起点重新开始",
       "description": "迷宫循环往复……",
-      "targetId": "lights-out"
+      "targetId": "conway"
     },
     {
       "label": "一扇隐藏的秘门",
       "description": "似乎通向未知领域",
-      "targetId": "dark-passage"
+      "targetId": "treasure"
     }
   ],
   "lights-out": [
@@ -142,14 +142,14 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "",
       "description": "",
-      "targetId": "final"
+      "targetId": "treasure"
     }
   ],
   "lockpick": [
     {
       "label": "石门缓缓打开，露出一个宝库入口",
       "description": "里面金光闪闪",
-      "targetId": "conway"
+      "targetId": "dark-passage"
     },
     {
       "label": "旁边出现了一条黑暗的通道",
@@ -161,12 +161,12 @@ export const mazeConfig: MazeConfig = {
     {
       "label": "回到来时路",
       "description": "身后的门还未关闭",
-      "targetId": "conway"
+      "targetId": "final"
     },
     {
       "label": "墙壁上出现了一个暗格",
       "description": "似乎通向另一个空间",
-      "targetId": "dark-passage"
+      "targetId": "lights-out"
     }
   ],
   "minimal": [
@@ -227,64 +227,64 @@ export const mazeGraph: MazeGraph = {
   {
     "id": "conway",
     "label": "Conway",
-    "x": 27,
-    "y": 38.8
+    "x": 26.7,
+    "y": 38.2
   },
   {
     "id": "dark-passage",
     "label": "黑暗通道",
-    "x": 51.3,
-    "y": 65.2
+    "x": 54.9,
+    "y": 27.8
   },
   {
     "id": "final",
     "label": "勇者试炼",
-    "x": 70.8,
-    "y": 62.5
+    "x": 79.2,
+    "y": 37
   },
   {
     "id": "lights-out",
     "label": "Lights Out",
-    "x": 27.5,
-    "y": 69.1
+    "x": 72.9,
+    "y": 72.5
   },
   {
     "id": "lockpick",
     "label": "符文之门",
-    "x": 53.9,
-    "y": 31.6
+    "x": 27.4,
+    "y": 63.3
   },
   {
     "id": "treasure",
     "label": "宝藏密室",
-    "x": 76.1,
-    "y": 27.5
+    "x": 45.3,
+    "y": 64.6
   }
 ],
   edges: [
   {
     "from": "conway",
+    "to": "dark-passage"
+  },
+  {
+    "from": "conway",
+    "to": "final"
+  },
+  {
+    "from": "dark-passage",
     "to": "lockpick"
+  },
+  {
+    "from": "final",
+    "to": "treasure"
   },
   {
     "from": "lockpick",
     "to": "lights-out"
   },
   {
-    "from": "conway",
-    "to": "treasure"
-  },
-  {
-    "from": "lights-out",
-    "to": "final"
-  },
-  {
     "from": "treasure",
-    "to": "dark-passage"
-  },
-  {
-    "from": "final",
-    "to": "dark-passage"
+    "to": "lights-out"
   }
 ],
 };

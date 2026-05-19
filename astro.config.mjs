@@ -4,6 +4,9 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeCodeTitle from 'rehype-code-title';
 import remarkEmoji from 'remark-emoji';
 import remarkDirective from 'remark-directive';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+
 import {
   transformerNotationHighlight,
   transformerNotationFocus,
@@ -29,6 +32,7 @@ export default defineConfig({
       ],
     },
     remarkPlugins: [
+      remarkMath,
       remarkEmoji,
       remarkDirective,
       remarkCustomContainer,
@@ -46,6 +50,7 @@ export default defineConfig({
           },
         },
       ],
+      rehypeKatex,
     ],
   },
 });

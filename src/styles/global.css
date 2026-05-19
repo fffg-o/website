@@ -1281,3 +1281,20 @@ article {
     align-items: flex-end;
   }
 }
+
+/* ========================================
+   KaTeX 数学公式修复
+   ======================================== */
+
+/* 强制隐藏 KaTeX 的 MathML 输出，防止原始 LaTeX 文本显示为字符版本。
+   rehype-katex 默认输出同时包含 HTML（视觉公式）和 MathML（含原始 LaTeX 文本的 <annotation>），
+   Tailwind prose 等样式可能覆盖 KaTeX 自带的 clip 隐藏规则。 */
+.katex .katex-mathml {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  height: 1px !important;
+  width: 1px !important;
+  overflow: hidden !important;
+}

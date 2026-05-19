@@ -34,7 +34,7 @@ website/
 │   │   └── projects/           # 项目展示
 │   ├── content.config.ts       # Astro 内容集合定义（含 Zod 校验）
 │   ├── layouts/
-│   │   └── Layout.astro        # 全局布局（导航栏、暗色模式、移动端抽屉、页脚彩蛋）
+│   │   └── Layout.astro        # 全局布局（导航栏、暗色模式、移动端抽屉）
 │   ├── lib/
 │   │   └── crypto.ts           # AES-256-GCM 加密/解密库
 │   ├── loaders/
@@ -168,6 +168,36 @@ npm run normalize:all --dry
 ```
 
 支持 6 种类型：`note`（蓝色）、`warning`（黄色）、`tip`（绿色）、`danger`（红色）、`info`（靛蓝）、`caution`（紫色）。
+
+### 数学公式
+
+使用 [KaTeX](https://katex.org) 渲染 LaTeX 数学公式，通过 [`remark-math`](https://github.com/remarkjs/remark-math) + [`rehype-katex`](https://github.com/remarkjs/rehype-katex) 实现。
+
+支持标准 LaTeX 数学语法，包括行内公式、独立公式、矩阵、向量、特殊符号等：
+
+```markdown
+<!-- 行内公式: $...$ -->
+当 $a \ne 0$ 时，$ax^2 + bx + c = 0$ 的解为 $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+
+<!-- 独立公式: $$...$$ -->
+$$
+\Gamma(z) = \int_0^\infty t^{z-1} e^{-t} \, dt
+$$
+
+<!-- 矩阵: \begin{pmatrix}...\end{pmatrix} -->
+$$
+A = \begin{pmatrix}
+1 & 2 & 3 \\
+4 & 5 & 6 \\
+7 & 8 & 9
+\end{pmatrix}
+$$
+
+<!-- 特殊符号 -->
+$\mathbb{R}^n$, $\langle \mathbf{u}, \mathbf{v} \rangle$, $\sum_{i=1}^n i = \frac{n(n+1)}{2}$
+```
+
+所有数学内容在构建时由 KaTeX 预渲染为 HTML，**无需加载 JavaScript 运行时**，保证页面性能。
 
 ### 代码高亮
 

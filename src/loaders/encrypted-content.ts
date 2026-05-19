@@ -6,13 +6,23 @@
  * 并解析 frontmatter，生成 Astro 内容集合条目。
  *
  * 加密文件格式: [12 字节 IV] + [16 字节 Auth Tag] + [密文]
+ *
+ * 数学公式处理策略：
+ * - $$...$$ 块级公式：在 loader 中用 KaTeX 直接预渲染，因为 micromark
+ *   的词法分析器会将 $$...$$ 误解析为围栏代码块，remark-math 无法介入。
+ *   预渲染的完整 KaTeX HTML（含 MathML）嵌入 markdown 文本，通过
+ *   renderMarkdown 管线时被当作原始 HTML 保留。
+ * - $...$ 内联公式：交由 remark-math + rehype-katex 管线正常处理。
+ * - MathML 元素由 CSS（global.css 中的 .katex .katex-mathml 规则）隐藏，
+ *   无需在代码中移除，保证 HTML 结构完整性。
  */
 
 import { createDecipheriv } from 'node:crypto';
-import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { join, relative, extname } from 'node:path';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join, relative } from 'node:path';
 
 import type { Loader, LoaderContext } from 'astro/loaders';
+import katex from 'katex';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
@@ -106,7 +116,6 @@ function parseFrontmatter(content: string): {
     const key = trimmed.slice(0, colonIdx).trim();
     let rawValue: string = trimmed.slice(colonIdx + 1).trim();
 
-    // 处理引号
     if (
       (rawValue.startsWith('"') && rawValue.endsWith('"')) ||
       (rawValue.startsWith("'") && rawValue.endsWith("'"))
@@ -116,7 +125,6 @@ function parseFrontmatter(content: string): {
       continue;
     }
 
-    // 处理数组: [item1, item2]
     if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
       const inner = rawValue.slice(1, -1);
       if (inner.trim() === '') {
@@ -167,6 +175,42 @@ function findEncryptedFiles(baseDir: string): string[] {
 }
 
 // ============================================================
+// 数学公式处理
+// ============================================================
+
+/**
+ * 预渲染 $$...$$ 块级数学公式为 KaTeX HTML
+ *
+ * 原因：micromark 词法分析阶段会先将 $$...$$ 解析为围栏代码块，
+ * 导致 remark-math 的块级扩展无法处理。在 loader 中预渲染可以
+ * 绕过这一问题，生成的 HTML 会原样通过 markdown 渲染管线。
+ *
+ * MathML 不在此处移除：它由 global.css 中的
+ * .katex .katex-mathml 规则隐藏（clip: rect），
+ * 移除 MathML 会破坏 KaTeX 的输出完整性。
+ *
+ * @param markdown - 原始 markdown 文本
+ * @returns 预处理后的 markdown（$$...$$ 已被替换为 KaTeX HTML）
+ */
+function preprocessBlockMath(markdown: string): string {
+  return markdown.replace(
+    /\$\$\n?([\s\S]*?)\n?\$\$/g,
+    (_match: string, texContent: string) => {
+      const trimmed = texContent.trim();
+      if (!trimmed) return _match;
+      try {
+        return katex.renderToString(trimmed, {
+          displayMode: true,
+          throwOnError: false,
+        });
+      } catch {
+        return _match;
+      }
+    },
+  );
+}
+
+// ============================================================
 // Loader
 // ============================================================
 
@@ -176,6 +220,11 @@ interface EncryptedLoaderOptions {
 
 /**
  * 创建一个加密内容加载器
+ *
+ * 数学公式处理管线：
+ * 1. 预渲染阶段：将 $$...$$ 块级公式用 KaTeX 转成 HTML 嵌入 markdown
+ * 2. context.renderMarkdown() 阶段：内联 $...$ 由 remark-math + rehype-katex 渲染
+ * 3. CSS 隐藏阶段：所有 MathML 元素由 global.css 规则隐藏
  *
  * @param options.base - 内容目录的基础路径
  */
@@ -198,23 +247,18 @@ export function encryptedContent(options: EncryptedLoaderOptions): Loader {
 
       for (const filePath of encFiles) {
         try {
-          // 读取加密文件
           const encryptedData = readFileSync(filePath);
-
-          // 解密
           const markdown = decryptContent(encryptedData);
-
-          // 计算 ID: 相对于 base 的路径，去掉 .md.enc 后缀
           const relPath = relative(base, filePath);
           const id = relPath.replace(/\.md\.enc$/, '');
-
-          // 解析 frontmatter
           const { data: rawData, body } = parseFrontmatter(markdown);
 
-          // 通过 Astro 的 Markdown 渲染管线处理 body，应用 remark/rehype 插件
-          const rendered = await context.renderMarkdown(markdown);
+          // 预渲染 $$...$$ 块级公式，内联 $...$ 保留给 remark-math 处理
+          // 注意：只对 body（去除 frontmatter）进行预处理和渲染，
+          // 否则 frontmatter 会被当作 markdown 正文渲染为可见文本。
+          const preprocessedBody = preprocessBlockMath(body);
+          const rendered = await context.renderMarkdown(preprocessedBody);
 
-          // 使用 Astro 内置的 parse 验证 schema
           const entry = {
             id,
             data: rawData,
