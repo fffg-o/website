@@ -1,0 +1,395 @@
+---
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL;
+
+// 获取所有博客文章
+const allPosts = await getCollection('blog');
+
+// 按系列分组
+const seriesMap = new Map<string, typeof allPosts>();
+for (const post of allPosts) {
+  const series = post.data.series;
+  if (series) {
+    if (!seriesMap.has(series)) {
+      seriesMap.set(series, []);
+    }
+    seriesMap.get(series)!.push(post);
+  }
+}
+
+// 构建系列列表：每个系列按日期排序，取第一篇作为链接目标
+const seriesList = Array.from(seriesMap.entries())
+  .map(([name, posts]) => {
+    const sorted = posts.sort((a, b) => a.data.date.localeCompare(b.data.date));
+    return {
+      name,
+      count: sorted.length,
+      slug: sorted[0].id.replace(/\.md$/, ''),
+    };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+{seriesList.length > 0 && (
+  <>
+    <!-- ===== 桌面端：固定悬浮侧边栏（>=960px 显示） ===== -->
+    <nav class="series-sidebar" aria-label="博客系列导航">
+      <div class="series-sidebar-header">
+        <svg class="series-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20"/>
+        </svg>
+        <span>系列</span>
+      </div>
+
+      <ul class="series-sidebar-list">
+        {seriesList.map((series) => (
+          <li class="series-sidebar-item">
+            <a
+              href={`${base}/blog/${series.slug}`}
+              title={`${series.name} · 共 ${series.count} 篇`}
+            >
+              <span class="series-sidebar-dot" aria-hidden="true" />
+              <span class="series-sidebar-name">{series.name}</span>
+              <span class="series-sidebar-count">{series.count}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- ===== 移动端：抽屉系列内容（由 Astro 服务端渲染于 <template> 中，客户端克隆至抽屉） ===== -->
+    <template id="drawer-series-template">
+      <div class="drawer-series-header">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20"/>
+        </svg>
+        <span>系列</span>
+      </div>
+      <ul class="drawer-series-list">
+        {seriesList.map((series) => (
+          <li class="drawer-series-item">
+            <a
+              href={`${base}/blog/${series.slug}`}
+              title={`${series.name} · 共 ${series.count} 篇`}
+            >
+              <span class="drawer-series-dot" aria-hidden="true" />
+              <span class="drawer-series-name">{series.name}</span>
+              <span class="drawer-series-count">{series.count}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </template>
+
+    <script>
+      (function() {
+        var container = document.getElementById('drawer-series');
+        var tpl = document.getElementById('drawer-series-template');
+        if (!container || !(tpl instanceof HTMLTemplateElement)) return;
+        // 克隆模板内容并填充到抽屉容器
+        var content = tpl.content.cloneNode(true);
+        container.appendChild(content);
+        container.classList.add('active');
+        // 清理模板（不再需要）
+        tpl.remove();
+      })();
+    </script>
+  </>
+)}
+
+<style is:global>
+  /* =============================
+     桌面端：系列悬浮侧边栏
+     ============================= */
+  .series-sidebar {
+    position: fixed;
+    left: max(calc((100vw - 1120px) / 2 - 260px), 1rem);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30;
+    width: max-content;
+    min-width: 150px;
+    max-width: 220px;
+    padding: 1.25rem 1rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s ease;
+  }
+
+  .dark .series-sidebar {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .series-sidebar:hover {
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .series-sidebar:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  /* 头部 */
+  .series-sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .series-sidebar-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  /* 列表 */
+  .series-sidebar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  /* 每一项 */
+  .series-sidebar-item {
+    margin: 0;
+    padding: 0;
+  }
+
+  .series-sidebar-item a {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+
+  .series-sidebar-item a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--color-primary) 0%, transparent);
+    transition: background 0.2s ease;
+  }
+
+  .series-sidebar-item a:hover {
+    color: var(--color-primary);
+    transform: translateX(3px);
+  }
+
+  .series-sidebar-item a:hover::before {
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  }
+
+  /* 圆点指示器 */
+  .series-sidebar-dot {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-border);
+    flex-shrink: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1;
+  }
+
+  .series-sidebar-item a:hover .series-sidebar-dot {
+    background: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+    transform: scale(1.2);
+  }
+
+  /* 系列名称 */
+  .series-sidebar-name {
+    flex: 0 1 auto;
+    overflow: visible;
+    white-space: nowrap;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 文章数量徽标 */
+  .series-sidebar-count {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-border);
+    padding: 0.125rem 0.375rem;
+    min-width: 1.25rem;
+    text-align: center;
+    border-radius: 999px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
+    line-height: 1.2;
+  }
+
+  .series-sidebar-item a:hover .series-sidebar-count {
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    color: var(--color-primary);
+  }
+
+  /* 屏幕宽度不足时隐藏桌面侧边栏 */
+  @media (max-width: 959px) {
+    .series-sidebar {
+      display: none;
+    }
+  }
+
+  /* 桌面端侧边栏进入动画 */
+  @keyframes series-sidebar-enter {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) translateX(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+  }
+
+  .series-sidebar {
+    animation: series-sidebar-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  }
+
+  /* 列表项交错进入动画 */
+  .series-sidebar-item {
+    opacity: 0;
+    animation: series-sidebar-item-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .series-sidebar-item:nth-child(1) { animation-delay: 0.2s; }
+  .series-sidebar-item:nth-child(2) { animation-delay: 0.25s; }
+  .series-sidebar-item:nth-child(3) { animation-delay: 0.3s; }
+  .series-sidebar-item:nth-child(4) { animation-delay: 0.35s; }
+  .series-sidebar-item:nth-child(5) { animation-delay: 0.4s; }
+  .series-sidebar-item:nth-child(6) { animation-delay: 0.45s; }
+  .series-sidebar-item:nth-child(7) { animation-delay: 0.5s; }
+  .series-sidebar-item:nth-child(8) { animation-delay: 0.55s; }
+
+  @keyframes series-sidebar-item-enter {
+    from {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* =============================
+     移动端（抽屉内）：系列导航
+     ============================= */
+
+  .drawer-series {
+    display: none;
+    margin-top: 1.25rem;
+  }
+
+  .drawer-series.active {
+    display: block;
+  }
+
+  .drawer-series-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+  }
+
+  .drawer-series-header svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .drawer-series-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .drawer-series-item a {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+  }
+
+  .drawer-series-item a:hover {
+    background: var(--color-border);
+    color: var(--color-primary);
+  }
+
+  .drawer-series-dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    background: var(--color-border);
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .drawer-series-item a:hover .drawer-series-dot {
+    background: var(--color-primary);
+  }
+
+  .drawer-series-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .drawer-series-count {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-border);
+    padding: 0.125rem 0.375rem;
+    min-width: 1.25rem;
+    text-align: center;
+    border-radius: 999px;
+    flex-shrink: 0;
+    line-height: 1.2;
+  }
+</style>

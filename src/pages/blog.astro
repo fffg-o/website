@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ReadingTime from '../components/ReadingTime.astro';
 import TagFilter from '../components/TagFilter.astro';
+import BlogSeriesSidebar from '../components/BlogSeriesSidebar.astro';
 import { getCollection } from 'astro:content';
 
 const posts = await getCollection('blog');
@@ -22,6 +23,7 @@ const allTags = Array.from(tagMap.entries()).map(([name, count]) => ({ name, cou
 ---
 
 <Layout title="博客 - fffg" description="技术文章与分享">
+  <BlogSeriesSidebar />
   <section>
     <h1 class="mb-6 text-2xl font-bold text-text sm:mb-8 sm:text-3xl">博客</h1>
     <TagFilter tags={allTags} maxTags={30} />
