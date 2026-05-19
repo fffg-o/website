@@ -4,7 +4,6 @@
 
 ```bash
 cp .env.example .env       # or ensure CONTENT_KEY is set (64 hex chars)
-export CONTENT_KEY="6d241af0f6ad08b835586483acc0ae5db52d7415be2794e954ff15fc4936040c"
 npm install
 ```
 
