@@ -36,94 +36,76 @@ function portalHref(targetId: string): string {
         </div>
       </div>
 
-      <!-- 金色传送门 - 全部亮起 -->
-      <div class="room-portals" id="room-portals-on" style="display:none">
-        <div class="room-portals-glow portal-glow-on"></div>
-        <div class="room-portals-content">
-          <div class="portal-visual portal-visual-on">
-            <svg viewBox="0 0 100 100" class="portal-svg">
-              <defs>
-                <radialGradient id="portal-glow-on" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.8"></stop>
-                  <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.3"></stop>
-                  <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"></stop>
-                </radialGradient>
-              </defs>
-              <circle cx="50" cy="50" r="45" fill="url(#portal-glow-on)" class="portal-pulse">
-                <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
-              </circle>
-              <circle cx="50" cy="50" r="20" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.6">
-                <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
-                <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
-              </circle>
-              <circle cx="50" cy="50" r="10" fill="none" stroke="#fde68a" stroke-width="1.5" opacity="0.4">
-                <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
-                <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
-              </circle>
-              <text x="50" y="55" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="bold">✦</text>
-            </svg>
-          </div>
-          <div class="room-portals-list">
-            {
-              externalPortals
-                .filter((_, i) => i === 0)
-                .map((portal: Portal) => (
-                  <a
-                    href={portalHref(portal.targetId)}
-                    class="room-portal-link portal-link-on"
-                  >
-                    <span class="room-portal-icon">✨</span>
-                    <span class="room-portal-arrow">→</span>
-                  </a>
-                ))
-            }
-          </div>
-        </div>
-      </div>
-
-      <!-- 蓝色传送门 - 全部熄灭 -->
-      <div class="room-portals" id="room-portals-off" style="display:none">
-        <div class="room-portals-glow portal-glow-off"></div>
-        <div class="room-portals-content">
-          <div class="portal-visual portal-visual-off">
-            <svg viewBox="0 0 100 100" class="portal-svg">
-              <defs>
-                <radialGradient id="portal-glow-off" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.8"></stop>
-                  <stop offset="60%" stop-color="#3b82f6" stop-opacity="0.3"></stop>
-                  <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
-                </radialGradient>
-              </defs>
-              <circle cx="50" cy="50" r="45" fill="url(#portal-glow-off)" class="portal-pulse">
-                <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
-              </circle>
-              <circle cx="50" cy="50" r="20" fill="none" stroke="#60a5fa" stroke-width="2" opacity="0.6">
-                <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
-                <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
-              </circle>
-              <circle cx="50" cy="50" r="10" fill="none" stroke="#93c5fd" stroke-width="1.5" opacity="0.4">
-                <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
-                <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
-              </circle>
-              <text x="50" y="55" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">🌙</text>
-            </svg>
-          </div>
-          <div class="room-portals-list">
-            {
-              externalPortals
-                .filter((_, i) => i === 1)
-                .map((portal: Portal) => (
-                  <a
-                    href={portalHref(portal.targetId)}
-                    class="room-portal-link portal-link-off"
-                  >
-                    <span class="room-portal-icon">🌙</span>
-                    <span class="room-portal-arrow">→</span>
-                  </a>
-                ))
-            }
-          </div>
-        </div>
+      <!-- 传送门区域 -->
+      <div class="conway-portals-row" id="conway-portals-row">
+        {
+          externalPortals.filter((_, i) => i === 0).map((portal: Portal) => (
+            <a
+              href={portalHref(portal.targetId)}
+              class="conway-portal"
+              id="room-portals-on"
+              style="display:none"
+            >
+              <div class="portal-visual portal-visual-on">
+                <svg viewBox="0 0 100 100" class="portal-svg">
+                  <defs>
+                    <radialGradient id="portal-glow-on" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.8"></stop>
+                      <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.3"></stop>
+                      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"></stop>
+                    </radialGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="45" fill="url(#portal-glow-on)" class="portal-pulse">
+                    <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="20" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.6">
+                    <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="10" fill="none" stroke="#fde68a" stroke-width="1.5" opacity="0.4">
+                    <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <text x="50" y="55" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="bold">✦</text>
+                </svg>
+              </div>
+            </a>
+          ))
+        }
+        {
+          externalPortals.filter((_, i) => i === 1).map((portal: Portal) => (
+            <a
+              href={portalHref(portal.targetId)}
+              class="conway-portal"
+              id="room-portals-off"
+              style="display:none"
+            >
+              <div class="portal-visual portal-visual-off">
+                <svg viewBox="0 0 100 100" class="portal-svg">
+                  <defs>
+                    <radialGradient id="portal-glow-off" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.8"></stop>
+                      <stop offset="60%" stop-color="#3b82f6" stop-opacity="0.3"></stop>
+                      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
+                    </radialGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="45" fill="url(#portal-glow-off)" class="portal-pulse">
+                    <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="20" fill="none" stroke="#60a5fa" stroke-width="2" opacity="0.6">
+                    <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="10" fill="none" stroke="#93c5fd" stroke-width="1.5" opacity="0.4">
+                    <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <text x="50" y="55" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="bold">🌙</text>
+                </svg>
+              </div>
+            </a>
+          ))
+        }
       </div>
     </div>
   </article>
@@ -131,7 +113,6 @@ function portalHref(targetId: string): string {
 </div>
 
 <style is:global>
-  /* ===== 关灯游戏专属样式 ===== */
 
   .lights-grid {
     display: grid;
@@ -385,156 +366,45 @@ function portalHref(targetId: string): string {
     }
   }
 
-  /* ===== 传送门发光条 ===== */
-  .portal-glow-on {
-    background: linear-gradient(
-      90deg,
-      #f59e0b,
-      #fbbf24,
-      #fde68a,
-      #f59e0b
-    ) !important;
-    background-size: 300% 100% !important;
-    animation: glow-shimmer 3s linear infinite !important;
-  }
-
-  .portal-glow-off {
-    background: linear-gradient(
-      90deg,
-      #3b82f6,
-      #60a5fa,
-      #93c5fd,
-      #3b82f6
-    ) !important;
-    background-size: 300% 100% !important;
-    animation: glow-shimmer 3s linear infinite !important;
-  }
-
-  @keyframes glow-shimmer {
-    0% {
-      background-position: 0% 50%;
-    }
-    100% {
-      background-position: 300% 50%;
-    }
-  }
-
-  /* ===== 传送门容器进出动画 ===== */
-  .room-portals {
-    animation: portal-appear 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes portal-appear {
-    0% {
-      opacity: 0;
-      transform: translateY(30px) scale(0.95);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  /* ===== 传送门列表 ===== */
-  .room-portals-list {
+  /* ===== 传送门行：并排布局 ===== */
+  .conway-portals-row {
     display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    padding: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .conway-portal {
+    display: inline-flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-  }
-
-  /* ===== 传送门链接 - 纯图标，无背景 ===== */
-  .room-portal-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
     text-decoration: none;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    background: transparent !important;
-    border: 1px solid transparent;
+    cursor: pointer;
   }
 
-  .room-portal-link:hover {
-    transform: translateX(4px) scale(1.05);
+  /* ===== 传送门显现动画 ===== */
+  .conway-portal.revealing {
+    animation: portal-reveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
-  .room-portal-link:active {
-    transform: translateX(2px) scale(0.97);
-  }
-
-  .room-portal-link:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
-  }
-
-  .room-portal-icon {
-    font-size: 1.3rem;
-    flex-shrink: 0;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .room-portal-link:hover .room-portal-icon {
-    transform: scale(1.2) rotate(-8deg);
-  }
-
-  .room-portal-arrow {
-    font-size: 1rem;
-    flex-shrink: 0;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .room-portal-link:hover .room-portal-arrow {
-    transform: translateX(5px);
-  }
-
-  /* 金色传送门链接 */
-  .portal-link-on {
-    color: #fbbf24;
-  }
-
-  .portal-link-on:hover {
-    color: #fde68a;
-    text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
-  }
-
-  .portal-link-on .room-portal-arrow {
-    color: #fbbf24;
-  }
-
-  /* 蓝色传送门链接 */
-  .portal-link-off {
-    color: #60a5fa;
-  }
-
-  .portal-link-off:hover {
-    color: #93c5fd;
-    text-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
-  }
-
-  .portal-link-off .room-portal-arrow {
-    color: #60a5fa;
-  }
-
-  /* ===== 胜利动画 - 粒子爆发 ===== */
-  .win-particle {
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    border-radius: 50%;
-    animation: particle-fly ease-out forwards;
-  }
-
-  @keyframes particle-fly {
+  @keyframes portal-reveal {
     0% {
+      opacity: 0;
+      transform: scale(0.3) rotate(-15deg);
+    }
+    50% {
       opacity: 1;
-      transform: translate(0, 0) scale(1) rotate(0deg);
+      transform: scale(1.15) rotate(3deg);
+    }
+    70% {
+      transform: scale(0.95) rotate(-1deg);
     }
     100% {
-      opacity: 0;
-      transform: translate(var(--tx), var(--ty)) scale(0) rotate(720deg);
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
     }
   }
 
@@ -566,7 +436,8 @@ function portalHref(targetId: string): string {
     var GRID_SIZE = 5;
     var grid = [];
     var moves = 0;
-    var isSolved = false;
+    var solvedAllOnTriggered = false;
+    var solvedAllOffTriggered = false;
 
     var gridEl = document.getElementById("lights-grid");
     var movesEl = document.getElementById("moves-count");
@@ -693,47 +564,9 @@ function portalHref(targetId: string): string {
       }, 500);
     }
 
-    // ===== 粒子特效 =====
-
-    function fireParticles(color1, color2) {
-      var colors = [color1, color2, "#fbbf24", "#f472b6", "#34d399", "#818cf8"];
-      for (var i = 0; i < 60; i++) {
-        var p = document.createElement("div");
-        p.className = "win-particle";
-        var color = colors[Math.floor(Math.random() * colors.length)];
-        var size = 3 + Math.random() * 8;
-        var angle = Math.random() * 360;
-        var dist = 80 + Math.random() * 200;
-        var tx = Math.cos((angle * Math.PI) / 180) * dist;
-        var ty = Math.sin((angle * Math.PI) / 180) * dist;
-        var dur = 1 + Math.random() * 1.5;
-        var delay = Math.random() * 0.4;
-        p.style.cssText = [
-          "left: 50%",
-          "top: 50%",
-          "width: " + size + "px",
-          "height: " + size + "px",
-          "background: " + color,
-          "--tx: " + tx + "px",
-          "--ty: " + ty + "px",
-          "animation-duration: " + dur + "s",
-          "animation-delay: " + delay + "s",
-          "border-radius: " + (Math.random() > 0.5 ? "50%" : "2px"),
-        ].join(";");
-        document.body.appendChild(p);
-        setTimeout(
-          function () {
-            p.remove();
-          },
-          (dur + delay) * 1000 + 100,
-        );
-      }
-    }
-
     // ===== 游戏逻辑 =====
 
     function handleCellClick(e) {
-      if (isSolved) return;
       var cell = e.currentTarget;
       if (!cell) return;
       var row = parseInt(cell.dataset.row, 10);
@@ -763,76 +596,48 @@ function portalHref(targetId: string): string {
       checkWin();
     }
 
-    function checkWin() {
-      if (isAllOn(grid)) {
-        isSolved = true;
-        if (puzzleArea) {
-          puzzleArea.style.transition =
-            "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)";
-          puzzleArea.style.opacity = "0";
-          puzzleArea.style.transform = "translateY(-20px)";
-          setTimeout(function () {
-            puzzleArea.style.display = "none";
-          }, 600);
-        }
-        fireParticles("#fbbf24", "#f59e0b");
+    function revealPortal(portalId) {
+      var portal = document.getElementById(portalId);
+      if (portal) {
+        portal.style.display = "block";
+        portal.classList.add("revealing");
         setTimeout(function () {
-          var portals = document.getElementById("room-portals-on");
-          if (portals) {
-            portals.style.display = "block";
-            setTimeout(function () {
-              portals.classList.add("room-portals-visible");
-            }, 50);
-          }
-        }, 700);
+          portal.classList.remove("revealing");
+        }, 800);
+      }
+    }
+
+    function checkWin() {
+      if (isAllOn(grid) && !solvedAllOnTriggered) {
+        solvedAllOnTriggered = true;
+        setTimeout(function () {
+          revealPortal("room-portals-on");
+        }, 500);
         return;
       }
 
-      if (isAllOff(grid)) {
-        isSolved = true;
-        if (puzzleArea) {
-          puzzleArea.style.transition =
-            "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)";
-          puzzleArea.style.opacity = "0";
-          puzzleArea.style.transform = "translateY(-20px)";
-          setTimeout(function () {
-            puzzleArea.style.display = "none";
-          }, 600);
-        }
-        fireParticles("#60a5fa", "#3b82f6");
+      if (isAllOff(grid) && !solvedAllOffTriggered) {
+        solvedAllOffTriggered = true;
         setTimeout(function () {
-          var portals = document.getElementById("room-portals-off");
-          if (portals) {
-            portals.style.display = "block";
-            setTimeout(function () {
-              portals.classList.add("room-portals-visible");
-            }, 50);
-          }
-        }, 700);
+          revealPortal("room-portals-off");
+        }, 500);
         return;
       }
     }
 
     function resetGame() {
-      isSolved = false;
+      solvedAllOnTriggered = false;
+      solvedAllOffTriggered = false;
       moves = 0;
       if (movesEl) movesEl.textContent = "0";
-
-      if (puzzleArea) {
-        puzzleArea.style.display = "";
-        puzzleArea.style.opacity = "";
-        puzzleArea.style.transform = "";
-      }
 
       var portalsOn = document.getElementById("room-portals-on");
       var portalsOff = document.getElementById("room-portals-off");
       if (portalsOn) {
         portalsOn.style.display = "none";
-        portalsOn.classList.remove("room-portals-visible");
       }
       if (portalsOff) {
         portalsOff.style.display = "none";
-        portalsOff.classList.remove("room-portals-visible");
       }
 
       grid = generatePuzzle();

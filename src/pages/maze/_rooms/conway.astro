@@ -1,0 +1,952 @@
+---
+import MazeMap from "../../../components/MazeMap.astro";
+import type { RoomExport } from "../../../data/maze";
+import type { Portal } from "../../../data/maze";
+import { getMazeUrl } from "../../../lib/maze-url";
+
+export const room: RoomExport = {
+  id: "conway",
+  portalSlots: [
+    { label: "", description: "" },
+    { label: "", description: "" },
+  ],
+};
+
+interface Props {
+  room: RoomExport;
+  baseUrl: string;
+  portals: Portal[];
+}
+const { room: meta, baseUrl, portals: externalPortals } = Astro.props;
+
+function portalHref(targetId: string): string {
+  return `${baseUrl}${getMazeUrl(targetId)}?from=${meta.id}`;
+}
+---
+
+<MazeMap currentRoomId={meta.id} />
+
+<div class="blog-page">
+  <article class="blog-article prose prose-zinc dark:prose-invert">
+    <div class="puzzle-room" data-puzzle-id={meta.id}>
+      <div class="puzzle-area" id="puzzle-area">
+        <!-- 游戏网格 -->
+        <div class="conway-grid-container">
+          <div class="conway-grid" id="conway-grid"></div>
+        </div>
+
+        <!-- 控制按钮 -->
+        <div class="conway-controls">
+          <button class="puzzle-btn puzzle-btn-secondary" id="reset-btn" title="重置">🔄</button>
+          <button class="puzzle-btn puzzle-btn-secondary" id="start-btn" title="开始">▶️</button>
+          <button class="puzzle-btn puzzle-btn-secondary" id="pause-btn" title="暂停" disabled>⏸️</button>
+        </div>
+      </div>
+
+      <!-- 传送门区域：并排放置 -->
+      <div class="conway-portals-row" id="conway-portals-row">
+        {
+          externalPortals.filter((_, i) => i === 0).map((portal: Portal) => (
+            <a
+              href={portalHref(portal.targetId)}
+              class="conway-portal"
+              id="room-portals-still"
+              style="display:none"
+            >
+              <div class="portal-visual portal-visual-still">
+                <svg viewBox="0 0 100 100" class="portal-svg">
+                  <defs>
+                    <radialGradient id="portal-glow-still" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.8"></stop>
+                      <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.3"></stop>
+                      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"></stop>
+                    </radialGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="45" fill="url(#portal-glow-still)" class="portal-pulse">
+                    <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="20" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.6">
+                    <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="10" fill="none" stroke="#fde68a" stroke-width="1.5" opacity="0.4">
+                    <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <text x="50" y="55" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="bold">✦</text>
+                </svg>
+              </div>
+            </a>
+          ))
+        }
+        {
+          externalPortals.filter((_, i) => i === 1).map((portal: Portal) => (
+            <a
+              href={portalHref(portal.targetId)}
+              class="conway-portal"
+              id="room-portals-osc"
+              style="display:none"
+            >
+              <div class="portal-visual portal-visual-osc">
+                <svg viewBox="0 0 100 100" class="portal-svg">
+                  <defs>
+                    <radialGradient id="portal-glow-osc" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#34d399" stop-opacity="0.8"></stop>
+                      <stop offset="60%" stop-color="#10b981" stop-opacity="0.3"></stop>
+                      <stop offset="100%" stop-color="#10b981" stop-opacity="0"></stop>
+                    </radialGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="45" fill="url(#portal-glow-osc)" class="portal-pulse">
+                    <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="20" fill="none" stroke="#34d399" stroke-width="2" opacity="0.6">
+                    <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="10" fill="none" stroke="#6ee7b7" stroke-width="1.5" opacity="0.4">
+                    <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <text x="50" y="55" text-anchor="middle" fill="#34d399" font-size="14" font-weight="bold">∞</text>
+                </svg>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </article>
+  <aside class="blog-toc-sidebar"></aside>
+</div>
+
+<style is:global>
+  /* ===== 网格容器 ===== */
+  .conway-grid-container {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    margin: 0.5rem auto;
+    background: color-mix(in srgb, var(--color-border) 30%, transparent);
+    border-radius: 1.5rem;
+    max-width: 100%;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .conway-grid {
+    display: grid;
+    gap: 1px;
+    background: color-mix(in srgb, var(--color-border) 50%, transparent);
+    border-radius: 0.375rem;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+
+  /* 网格容器滚动条微调 */
+  .conway-grid-container::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+  .conway-grid-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .conway-grid-container::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-border) 60%, transparent);
+    border-radius: 3px;
+  }
+
+  /* ===== 单元格 ===== */
+  .conway-cell {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    padding: 0;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.08s ease, transform 0.08s ease, box-shadow 0.15s ease;
+    background: color-mix(in srgb, var(--color-border) 15%, transparent);
+  }
+
+  .conway-cell:hover {
+    transform: scale(1.15);
+    z-index: 1;
+    box-shadow: 0 0 4px var(--color-primary);
+  }
+
+  .conway-cell:active {
+    transform: scale(0.9);
+  }
+
+  .conway-cell.alive {
+    background: var(--color-primary);
+    box-shadow: 0 0 3px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
+
+  .conway-cell.alive:hover {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-primary) 60%, transparent);
+  }
+
+  .conway-cell.just-born {
+    background: #34d399;
+    box-shadow: 0 0 4px rgba(52, 211, 153, 0.4);
+  }
+
+  .conway-cell.just-died {
+    background: color-mix(in srgb, var(--color-border) 25%, transparent);
+    animation: cell-fade 0.3s ease-out forwards;
+  }
+
+  @keyframes cell-fade {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  /* ===== 控制按钮区域 ===== */
+  .conway-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  /* ===== 按钮基础样式（复用 lights-out 模式） ===== */
+  .puzzle-btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 1.25rem;
+    border: none;
+    border-radius: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.02em;
+    position: relative;
+    overflow: hidden;
+    line-height: 1;
+  }
+
+  .puzzle-btn-secondary {
+    background: color-mix(in srgb, var(--color-border) 45%, transparent);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .puzzle-btn-secondary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0.875rem;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary) 15%, transparent),
+      transparent 50%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .puzzle-btn-secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-border) 70%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.1),
+      0 0 20px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  }
+
+  .puzzle-btn-secondary:hover:not(:disabled)::before {
+    opacity: 1;
+  }
+
+  .puzzle-btn-secondary:active:not(:disabled) {
+    transform: translateY(0) scale(0.95);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .puzzle-btn-secondary:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .puzzle-btn-secondary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ===== 传送门视觉 ===== */
+  .portal-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+  }
+
+  .portal-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.15));
+  }
+
+  .portal-visual-osc .portal-svg {
+    filter: drop-shadow(0 0 30px rgba(52, 211, 153, 0.15));
+  }
+
+  .portal-pulse {
+    animation: portal-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes portal-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  /* ===== 传送门行：并排布局 ===== */
+  .conway-portals-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    padding: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  /* ===== 合并后的传送门（纯图标，无卡片样式） ===== */
+  .conway-portal {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* ===== 小屏幕适配 ===== */
+  @media (max-width: 639px) {
+    .conway-grid-container {
+      padding: 0.5rem;
+      margin: 0.25rem -0.5rem;
+      border-radius: 1rem;
+    }
+
+    .conway-cell {
+      width: 10px;
+      height: 10px;
+    }
+
+    .conway-controls {
+      gap: 0.5rem;
+    }
+
+    .puzzle-btn {
+      padding: 0.5rem 1rem;
+      font-size: 1.1rem;
+      border-radius: 0.75rem;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .conway-cell {
+      width: 8px;
+      height: 8px;
+      border-radius: 1px;
+    }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+(function () {
+  "use strict";
+
+  // ============================================================
+  // 康威生命游戏核心逻辑
+  // ============================================================
+
+  // ===== 常量配置 =====
+  var COLS = 65;
+  var ROWS = 46;
+  var INTERVAL_MS = 180;
+
+  // ===== DOM 元素 =====
+  var gridEl = document.getElementById("conway-grid");
+  var resetBtn = document.getElementById("reset-btn");
+  var startBtn = document.getElementById("start-btn");
+  var pauseBtn = document.getElementById("pause-btn");
+  var portalsStill = document.getElementById("room-portals-still");
+  var portalsOsc = document.getElementById("room-portals-osc");
+
+  // ===== 游戏状态 =====
+  var grid = [];
+  var running = false;
+  var timer = null;
+  var generation = 0;
+
+  // ===== 模式检测 =====
+  var stillLifeTriggered = false;
+  var oscillatorTriggered = false;
+  var prevGridForStill = null;
+
+  // ============================================================
+  // 网格操作
+  // ============================================================
+
+  /** 创建空网格 */
+  function createEmptyGrid() {
+    var g = [];
+    for (var r = 0; r < ROWS; r++) {
+      g[r] = [];
+      for (var c = 0; c < COLS; c++) {
+        g[r][c] = 0;
+      }
+    }
+    return g;
+  }
+
+  /** 深拷贝网格 */
+  function cloneGrid(g) {
+    var copy = [];
+    for (var r = 0; r < ROWS; r++) {
+      copy[r] = g[r].slice();
+    }
+    return copy;
+  }
+
+  /** 计算活细胞数量 */
+  function countPopulation(g) {
+    var count = 0;
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        count += g[r][c];
+      }
+    }
+    return count;
+  }
+
+  /** 计算邻居数（环形边界） */
+  function countNeighbors(g, r, c) {
+    var count = 0;
+    for (var dr = -1; dr <= 1; dr++) {
+      for (var dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        var nr = (r + dr + ROWS) % ROWS;
+        var nc = (c + dc + COLS) % COLS;
+        count += g[nr][nc];
+      }
+    }
+    return count;
+  }
+
+  /** 计算下一代 */
+  function nextGeneration(g) {
+    var newGrid = createEmptyGrid();
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        var neighbors = countNeighbors(g, r, c);
+        if (g[r][c] === 1) {
+          newGrid[r][c] = neighbors === 2 || neighbors === 3 ? 1 : 0;
+        } else {
+          newGrid[r][c] = neighbors === 3 ? 1 : 0;
+        }
+      }
+    }
+    return newGrid;
+  }
+
+  // ============================================================
+  // 静止图形检测
+  // ============================================================
+
+  /**
+   * 扫描网格，检测已知的静物图案。
+   * 使用模板匹配检测常见的静物：
+   * - Block (2×2 方块)
+   * - Beehive (蜂巢)
+   * - Loaf (面包)
+   * - Boat (船)
+   * - Tub (水桶)
+   */
+  function countStillLifePatterns(g) {
+    var count = 0;
+    var checked = createEmptyGrid();
+
+    // Block: 2×2 方块
+    for (var r = 0; r < ROWS - 1; r++) {
+      for (var c = 0; c < COLS - 1; c++) {
+        if (
+          g[r][c] === 1 && g[r][c+1] === 1 &&
+          g[r+1][c] === 1 && g[r+1][c+1] === 1 &&
+          checked[r][c] === 0
+        ) {
+          // 检查周围（2×2 之外）是否都不活，确保是独立的 block
+          var isolated = true;
+          for (var dr = -1; dr <= 2; dr++) {
+            for (var dc = -1; dc <= 2; dc++) {
+              var nr = r + dr;
+              var nc = c + dc;
+              if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                // 不在内部 2x2 区域内
+                if (!(dr >= 0 && dr <= 1 && dc >= 0 && dc <= 1)) {
+                  if (g[nr][nc] === 1) isolated = false;
+                }
+              }
+            }
+          }
+          if (isolated) {
+            count++;
+            checked[r][c] = checked[r][c+1] = checked[r+1][c] = checked[r+1][c+1] = 1;
+          }
+        }
+      }
+    }
+
+    // Tub (菱形): 5个细胞的菱形图案
+    //  □ ■ □
+    //  ■ □ ■
+    //  □ ■ □
+    for (var r = 1; r < ROWS - 1; r++) {
+      for (var c = 1; c < COLS - 1; c++) {
+        if (
+          g[r-1][c] === 1 &&
+          g[r][c-1] === 1 && g[r][c] === 0 && g[r][c+1] === 1 &&
+          g[r+1][c] === 1 &&
+          checked[r-1][c] === 0
+        ) {
+          var isolated = true;
+          for (var dr = -1; dr <= 1; dr++) {
+            for (var dc = -1; dc <= 1; dc++) {
+              var nr = r + dr;
+              var nc = c + dc;
+              // 跳过图案内的细胞
+              if ((dr === -1 && dc === 0) || (dr === 0 && dc === -1) ||
+                  (dr === 0 && dc === 1) || (dr === 1 && dc === 0)) continue;
+              if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                if (g[nr][nc] === 1) isolated = false;
+              }
+            }
+          }
+          if (isolated) {
+            count++;
+            checked[r-1][c] = checked[r][c-1] = checked[r][c+1] = checked[r+1][c] = 1;
+          }
+        }
+      }
+    }
+
+    // Boat (船): 3×3 区域检测
+    // ■ ■ □
+    // ■ □ ■
+    // □ ■ □
+    for (var r = 0; r < ROWS - 2; r++) {
+      for (var c = 0; c < COLS - 2; c++) {
+        if (
+          g[r][c] === 1 && g[r][c+1] === 1 && g[r][c+2] === 0 &&
+          g[r+1][c] === 1 && g[r+1][c+1] === 0 && g[r+1][c+2] === 1 &&
+          g[r+2][c] === 0 && g[r+2][c+1] === 1 && g[r+2][c+2] === 0 &&
+          checked[r][c] === 0
+        ) {
+          count++;
+          checked[r][c] = checked[r][c+1] = 1;
+          checked[r+1][c] = checked[r+1][c+2] = 1;
+          checked[r+2][c+1] = 1;
+        }
+      }
+    }
+
+    // Beehive (蜂巢): 2×3 + 两侧
+    //  □ ■ ■ □
+    //  ■ □ □ ■
+    //  □ ■ ■ □
+    for (var r = 0; r < ROWS - 2; r++) {
+      for (var c = 0; c < COLS - 3; c++) {
+        if (
+          g[r][c] === 0 && g[r][c+1] === 1 && g[r][c+2] === 1 && g[r][c+3] === 0 &&
+          g[r+1][c] === 1 && g[r+1][c+1] === 0 && g[r+1][c+2] === 0 && g[r+1][c+3] === 1 &&
+          g[r+2][c] === 0 && g[r+2][c+1] === 1 && g[r+2][c+2] === 1 && g[r+2][c+3] === 0 &&
+          checked[r][c+1] === 0
+        ) {
+          count++;
+          checked[r][c+1] = checked[r][c+2] = 1;
+          checked[r+1][c] = checked[r+1][c+3] = 1;
+          checked[r+2][c+1] = checked[r+2][c+2] = 1;
+        }
+      }
+    }
+
+    // Loaf (面包): 比蜂巢多一个突出
+    //  □ ■ ■ □
+    //  ■ □ □ ■
+    //  □ ■ □ ■
+    //  □ □ ■ □
+    for (var r = 0; r < ROWS - 3; r++) {
+      for (var c = 0; c < COLS - 3; c++) {
+        if (
+          g[r][c] === 0 && g[r][c+1] === 1 && g[r][c+2] === 1 && g[r][c+3] === 0 &&
+          g[r+1][c] === 1 && g[r+1][c+1] === 0 && g[r+1][c+2] === 0 && g[r+1][c+3] === 1 &&
+          g[r+2][c] === 0 && g[r+2][c+1] === 1 && g[r+2][c+2] === 0 && g[r+2][c+3] === 1 &&
+          g[r+3][c] === 0 && g[r+3][c+1] === 0 && g[r+3][c+2] === 1 && g[r+3][c+3] === 0 &&
+          checked[r][c+1] === 0
+        ) {
+          count++;
+          checked[r][c+1] = checked[r][c+2] = 1;
+          checked[r+1][c] = checked[r+1][c+3] = 1;
+          checked[r+2][c+1] = checked[r+2][c+3] = 1;
+          checked[r+3][c+2] = 1;
+        }
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * 扫描网格，检测已知的震荡图案。
+   * 通过比较当前网格和上一代网格来识别震荡行为，
+   * 并统计已知的震荡器模板。
+   */
+  function countOscillatorPatterns(g, prev) {
+    if (!prev) return 0;
+    var count = 0;
+    var checked = createEmptyGrid();
+
+    // Blinker (闪烁器): 3个细胞水平或垂直排列
+    // 模式: 水平 ■ ■ ■  → 垂直
+    //        □ □ □      ■
+    //        □ □ □      ■
+    //                    ■
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS - 2; c++) {
+        // 水平 blinker: 3 个连续活细胞 (中间跨 3 列)
+        if (
+          g[r][c] === 1 && g[r][c+1] === 1 && g[r][c+2] === 1 &&
+          checked[r][c] === 0
+        ) {
+          // 检查上下是否为空（独立）
+          var isolated = true;
+          if (r > 0 && (g[r-1][c] || g[r-1][c+1] || g[r-1][c+2])) isolated = false;
+          if (r < ROWS - 1 && (g[r+1][c] || g[r+1][c+1] || g[r+1][c+2])) isolated = false;
+          if (c > 0 && g[r][c-1]) isolated = false;
+          if (c < COLS - 3 && g[r][c+3]) isolated = false;
+          if (isolated) {
+            count++;
+            checked[r][c] = checked[r][c+1] = checked[r][c+2] = 1;
+          }
+        }
+      }
+    }
+
+    // 垂直 blinker
+    for (var r = 0; r < ROWS - 2; r++) {
+      for (var c = 0; c < COLS; c++) {
+        if (
+          g[r][c] === 1 && g[r+1][c] === 1 && g[r+2][c] === 1 &&
+          checked[r][c] === 0
+        ) {
+          var isolated = true;
+          if (c > 0 && (g[r][c-1] || g[r+1][c-1] || g[r+2][c-1])) isolated = false;
+          if (c < COLS - 1 && (g[r][c+1] || g[r+1][c+1] || g[r+2][c+1])) isolated = false;
+          if (r > 0 && g[r-1][c]) isolated = false;
+          if (r < ROWS - 3 && g[r+3][c]) isolated = false;
+          if (isolated) {
+            count++;
+            checked[r][c] = checked[r+1][c] = checked[r+2][c] = 1;
+          }
+        }
+      }
+    }
+
+    // Toad (蟾蜍): 2×4 区域
+    // 第一帧:    第二帧:
+    //  ■ ■ ■ □    □ ■ □ □
+    //  □ □ ■ ■    ■ □ □ ■
+    //             ■ ■ □ □
+    for (var r = 0; r < ROWS - 1; r++) {
+      for (var c = 0; c < COLS - 3; c++) {
+        if (
+          g[r][c] === 1 && g[r][c+1] === 1 && g[r][c+2] === 1 && g[r][c+3] === 0 &&
+          g[r+1][c] === 0 && g[r+1][c+1] === 0 && g[r+1][c+2] === 1 && g[r+1][c+3] === 1 &&
+          checked[r][c] === 0
+        ) {
+          count++;
+          checked[r][c] = checked[r][c+1] = checked[r][c+2] = 1;
+          checked[r+1][c+2] = checked[r+1][c+3] = 1;
+        }
+      }
+    }
+
+    // Toad 旋转形式（翻转）
+    for (var r = 0; r < ROWS - 1; r++) {
+      for (var c = 0; c < COLS - 3; c++) {
+        if (
+          g[r][c] === 0 && g[r][c+1] === 1 && g[r][c+2] === 1 && g[r][c+3] === 0 &&
+          g[r+1][c] === 1 && g[r+1][c+1] === 0 && g[r+1][c+2] === 0 && g[r+1][c+3] === 1 &&
+          checked[r][c+1] === 0
+        ) {
+          count++;
+          checked[r][c+1] = checked[r][c+2] = 1;
+          checked[r+1][c] = checked[r+1][c+3] = 1;
+        }
+      }
+    }
+
+    return count;
+  }
+
+  // ============================================================
+  // 模式检测与传送门触发
+  // ============================================================
+
+  function checkPatternsAndPortals() {
+    if (!prevGridForStill) return;
+
+    // 每 3 代扫描一次以减少性能开销
+    if (generation % 3 === 0) {
+
+      // --- 静止图形检测 ---
+      // 直接扫描当前网格中的静物图案数量
+      if (!stillLifeTriggered) {
+        var stillPatterns = countStillLifePatterns(grid);
+        if (stillPatterns >= 5) {
+          stillLifeTriggered = true;
+          setTimeout(function () {
+            revealPortal(portalsStill);
+          }, 500);
+        }
+      }
+
+      // --- 震荡图形检测 ---
+      // 直接扫描当前网格中的震荡器图案数量
+      if (!oscillatorTriggered) {
+        var oscPatterns = countOscillatorPatterns(grid, prevGridForStill);
+        if (oscPatterns >= 5) {
+          oscillatorTriggered = true;
+          setTimeout(function () {
+            revealPortal(portalsOsc);
+          }, 500);
+        }
+      }
+    }
+  }
+
+  // ============================================================
+  // 渲染
+  // ============================================================
+
+  /** 创建网格 DOM */
+  function renderGrid() {
+    if (!gridEl) return;
+    gridEl.innerHTML = "";
+    gridEl.style.gridTemplateColumns = "repeat(" + COLS + ", 1fr)";
+    gridEl.style.gridTemplateRows = "repeat(" + ROWS + ", 1fr)";
+
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        var cell = document.createElement("button");
+        cell.className = "conway-cell" + (grid[r][c] === 1 ? " alive" : "");
+        cell.dataset.row = String(r);
+        cell.dataset.col = String(c);
+        cell.setAttribute("aria-label", "格子 " + (r + 1) + "-" + (c + 1));
+        cell.addEventListener("click", handleCellClick);
+        if (r === 0 || r === ROWS - 1 || c === 0 || c === COLS - 1) {
+          cell.addEventListener("mouseenter", handleCellDrag);
+        }
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+
+  /** 点击/触控放置生命 */
+  var isDragging = false;
+
+  function handleCellClick(e) {
+    if (running) return;
+    var cell = e.currentTarget;
+    var r = parseInt(cell.dataset.row, 10);
+    var c = parseInt(cell.dataset.col, 10);
+    toggleCellState(r, c);
+  }
+
+  function handleCellDrag(e) {
+    if (!isDragging || running) return;
+    var cell = e.currentTarget;
+    var r = parseInt(cell.dataset.row, 10);
+    var c = parseInt(cell.dataset.col, 10);
+    grid[r][c] = 1;
+    cell.className = "conway-cell alive";
+  }
+
+  /** 切换单个格子状态 */
+  function toggleCellState(r, c) {
+    grid[r][c] = grid[r][c] === 1 ? 0 : 1;
+    var index = r * COLS + c;
+    var cell = gridEl.children[index];
+    if (cell) {
+      cell.className = "conway-cell" + (grid[r][c] === 1 ? " alive" : "");
+    }
+  }
+
+  /** 更新所有格子 */
+  function updateGridDisplay() {
+    if (!gridEl) return;
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        var index = r * COLS + c;
+        var cell = gridEl.children[index];
+        if (cell) {
+          cell.className = "conway-cell" + (grid[r][c] === 1 ? " alive" : "");
+        }
+      }
+    }
+  }
+
+  // ============================================================
+  // 传送门显现动画
+  // ============================================================
+
+  function revealPortal(portalEl) {
+    if (!portalEl) return;
+    portalEl.style.display = "block";
+    portalEl.classList.add("revealing");
+    setTimeout(function () {
+      portalEl.classList.remove("revealing");
+    }, 800);
+  }
+
+  // ============================================================
+  // 游戏循环
+  // ============================================================
+
+  function gameTick() {
+    prevGridForStill = cloneGrid(grid);
+
+    grid = nextGeneration(grid);
+    generation++;
+    updateGridDisplay();
+    checkPatternsAndPortals();
+
+    // 如果生命全部消失，自动暂停
+    if (countPopulation(grid) === 0 && running) {
+      pauseGame();
+    }
+  }
+
+  function startGame() {
+    if (running) return;
+    // 检查是否有活细胞
+    if (countPopulation(grid) === 0) return;
+    running = true;
+    if (startBtn) startBtn.disabled = true;
+    if (pauseBtn) pauseBtn.disabled = false;
+    timer = setInterval(gameTick, INTERVAL_MS);
+  }
+
+  function pauseGame() {
+    running = false;
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    if (startBtn) startBtn.disabled = false;
+    if (pauseBtn) pauseBtn.disabled = true;
+  }
+
+  function resetGame() {
+    pauseGame();
+    generation = 0;
+    stillLifeTriggered = false;
+    oscillatorTriggered = false;
+    prevGridForStill = null;
+
+    grid = createEmptyGrid();
+
+    // 重置传送门
+    if (portalsStill) {
+      portalsStill.style.display = "none";
+    }
+    if (portalsOsc) {
+      portalsOsc.style.display = "none";
+    }
+
+    renderGrid();
+  }
+
+  // ============================================================
+  // 鼠标拖拽绘制支持
+  // ============================================================
+
+  function initDragDrawing() {
+    if (!gridEl) return;
+
+    gridEl.addEventListener("mousedown", function (e) {
+      if (running) return;
+      isDragging = true;
+      var cell = e.target;
+      if (cell.classList && cell.classList.contains("conway-cell")) {
+        var r = parseInt(cell.dataset.row, 10);
+        var c = parseInt(cell.dataset.col, 10);
+        grid[r][c] = 1;
+        cell.className = "conway-cell alive";
+      }
+    });
+
+    document.addEventListener("mousemove", function (e) {
+      if (!isDragging || running) return;
+      var el = document.elementFromPoint(e.clientX, e.clientY);
+      if (el && el.classList && el.classList.contains("conway-cell")) {
+        var r = parseInt(el.dataset.row, 10);
+        var c = parseInt(el.dataset.col, 10);
+        if (grid[r][c] === 0) {
+          grid[r][c] = 1;
+          el.className = "conway-cell alive";
+        }
+      }
+    });
+
+    document.addEventListener("mouseup", function () {
+      isDragging = false;
+    });
+
+    // 触控支持
+    gridEl.addEventListener("touchstart", function (e) {
+      if (running) return;
+      var touch = e.touches[0];
+      var el = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (el && el.classList && el.classList.contains("conway-cell")) {
+        var r = parseInt(el.dataset.row, 10);
+        var c = parseInt(el.dataset.col, 10);
+        toggleCellState(r, c);
+      }
+    }, { passive: true });
+  }
+
+  // ============================================================
+  // 初始化
+  // ============================================================
+
+  function init() {
+    grid = createEmptyGrid();
+    renderGrid();
+    initDragDrawing();
+
+    if (resetBtn) resetBtn.addEventListener("click", resetGame);
+    if (startBtn) startBtn.addEventListener("click", startGame);
+    if (pauseBtn) pauseBtn.addEventListener("click", pauseGame);
+  }
+
+  init();
+})();
+</script>
