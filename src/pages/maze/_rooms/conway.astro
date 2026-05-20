@@ -3,6 +3,7 @@ import MazeMap from "../../../components/MazeMap.astro";
 import type { RoomExport } from "../../../data/maze";
 import type { Portal } from "../../../data/maze";
 import { getMazeUrl } from "../../../lib/maze-url";
+import { mazeConfig } from "../../../data/maze-config.generated";
 
 export const room: RoomExport = {
   id: "conway",
@@ -20,7 +21,7 @@ interface Props {
 const { room: meta, baseUrl, portals: externalPortals } = Astro.props;
 
 function portalHref(targetId: string): string {
-  return `${baseUrl}${getMazeUrl(targetId)}?from=${meta.id}`;
+  return `${baseUrl}${getMazeUrl(targetId, mazeConfig.mazeSalt)}?from=${meta.id}`;
 }
 ---
 

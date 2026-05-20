@@ -33,18 +33,24 @@ function getKey(): Buffer {
 }
 
 /**
- * 将明文 ID 加密为确定性十六进制 slug
+ * 将明文 ID 加密为十六进制 slug
  *
- * 使用 HMAC-SHA256 生成确定性哈希，确保：
- * - 同一 ID 始终生成相同的 slug（解决 dev server 热重载一致性）
- * - 无密钥无法预测 slug 值
+ * 使用 HMAC-SHA256 生成哈希：
+ * - 不传 salt：同一 ID 始终生成相同的 slug（确定性，向后兼容）
+ * - 传 salt：slug = salt + HMAC(plaintext + ":" + salt)，每次构建不同
+ *   用于迷宫路由，使每个构建版本的路由都不同
  *
- * @param plaintext - 明文 ID (如 "lockpick")
- * @returns 64 字符十六进制字符串，用作 URL slug
+ * @param plaintext - 明文 ID (如 "conway")
+ * @param salt - 可选盐值（16 字符十六进制），用于每次构建变化路由
+ * @returns 64 字符（无 salt）或 80 字符（带 salt）的十六进制 slug
  */
-export function encryptSlug(plaintext: string): string {
+export function encryptSlug(plaintext: string, salt?: string): string {
   const key = getKey();
   const hmac = createHmac('sha256', key);
+  if (salt) {
+    hmac.update(plaintext + ':' + salt, 'utf-8');
+    return salt + hmac.digest('hex');
+  }
   hmac.update(plaintext, 'utf-8');
   return hmac.digest('hex');
 }

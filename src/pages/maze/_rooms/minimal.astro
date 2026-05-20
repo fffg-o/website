@@ -9,6 +9,7 @@
 import MazeMap from '../../../components/MazeMap.astro';
 import type { RoomExport, Portal } from '../../../data/maze';
 import { getMazeUrl } from '../../../lib/maze-url';
+import { mazeConfig } from '../../../data/maze-config.generated';
 
 const title = 'DEV';
 const description = '自动发现所有房间，方便开发快速跳转。';
@@ -26,7 +27,7 @@ interface Props {
 const { room: meta, baseUrl } = Astro.props;
 
 function portalHref(targetId: string): string {
-  return `${baseUrl}${getMazeUrl(targetId)}`;
+  return `${baseUrl}${getMazeUrl(targetId, mazeConfig.mazeSalt)}`;
 }
 
 // 自动扫描所有房间文件，提取 room.id

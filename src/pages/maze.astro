@@ -15,8 +15,8 @@ const base = import.meta.env.BASE_URL;
 
 // 入口链接：使用 mazeConfig 中随机分配的起点房间
 // 每次构建后起点房间可能不同，因此迷宫入口也随之变化
-const entrySlug = encryptSlug(mazeConfig.startRoomId);
-const minimalSlug = minimalRoom ? encryptSlug('minimal') : '';
+const entrySlug = encryptSlug(mazeConfig.startRoomId, mazeConfig.mazeSalt);
+const minimalSlug = minimalRoom ? encryptSlug('minimal', mazeConfig.mazeSalt) : '';
 ---
 
 <Layout title="迷宫 - fffg" description="加密路由的隐藏页面集合" hideScrollButtons={true}>

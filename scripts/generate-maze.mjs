@@ -437,7 +437,7 @@ function bfsTraversal(ids, edges) {
 // 输出文件生成
 // ============================================================
 
-function generateConfigContent(startRoomId, nodes, edges, portalsMap) {
+function generateConfigContent(startRoomId, nodes, edges, portalsMap, mazeSalt) {
   const nodesJson = JSON.stringify(nodes, null, 2);
   const edgesJson = JSON.stringify(
     edges.map((e) => ({ from: e.source, to: e.target })),
@@ -473,6 +473,8 @@ export interface MazeConfig {
   edges: MazeConfigEdge[];
   /** 每个房间的传送门映射（生成器基于槽位随机分配 targetId） */
   portalsMap: Record<string, Portal[]>;
+  /** 迷宫路由盐值（每次构建随机，用于加密房间 URL，实现路由多变） */
+  mazeSalt: string;
 }
 
 export const mazeConfig: MazeConfig = {
@@ -480,6 +482,7 @@ export const mazeConfig: MazeConfig = {
   nodes: ${nodesJson},
   edges: ${edgesJson},
   portalsMap: ${portalsMapJson},
+  mazeSalt: '${mazeSalt}',
 };
 `;
 }
@@ -592,12 +595,21 @@ function main() {
   );
   console.log(`\n🚪 传送门总数: ${totalPortals} 个`);
 
-  // ---- 10. 输出配置文件 ----
+  // ---- 10. 生成随机盐值（每次构建不同，用于加密房间路由）----
+  const saltBytes = [];
+  for (let i = 0; i < 8; i++) {
+    saltBytes.push(rng.nextInt(0, 256));
+  }
+  const mazeSalt = saltBytes.map((b) => b.toString(16).padStart(2, '0')).join('');
+  console.log(`\n🧂 迷宫路由盐值: ${mazeSalt}`);
+
+  // ---- 11. 输出配置文件 ----
   const content = generateConfigContent(
     startRoomId,
     resultNodes,
     edges,
     portalsMap,
+    mazeSalt,
   );
   writeFileSync(OUTPUT_FILE, content, 'utf-8');
 

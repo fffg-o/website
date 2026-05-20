@@ -24,7 +24,7 @@ export async function getStaticPaths() {
   );
 
   return allRooms.map((room) => {
-    const encryptedSlug = encryptSlug(room.id);
+    const encryptedSlug = encryptSlug(room.id, mazeConfig.mazeSalt);
     return {
       params: { slug: encryptedSlug },
       props: { room },
