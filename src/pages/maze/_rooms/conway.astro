@@ -44,12 +44,12 @@ function portalHref(targetId: string): string {
       </div>
 
       <!-- 传送门区域：并排放置 -->
-      <div class="conway-portals-row" id="conway-portals-row">
+      <div class="portals-row" id="conway-portals-row">
         {
           externalPortals.filter((_, i) => i === 0).map((portal: Portal) => (
             <a
               href={portalHref(portal.targetId)}
-              class="conway-portal"
+              class="portal-link"
               id="room-portals-still"
               style="display:none"
             >
@@ -83,7 +83,7 @@ function portalHref(targetId: string): string {
           externalPortals.filter((_, i) => i === 1).map((portal: Portal) => (
             <a
               href={portalHref(portal.targetId)}
-              class="conway-portal"
+              class="portal-link"
               id="room-portals-osc"
               style="display:none"
             >
@@ -214,125 +214,9 @@ function portalHref(targetId: string): string {
     margin-top: 1rem;
   }
 
-  /* ===== 按钮基础样式（复用 lights-out 模式） ===== */
-  .puzzle-btn {
-    padding: 0.65rem 1.25rem;
-    font-size: 1.25rem;
-    border: none;
-    border-radius: 0.875rem;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    letter-spacing: 0.02em;
-    position: relative;
-    overflow: hidden;
-    line-height: 1;
-  }
-
-  .puzzle-btn-secondary {
-    background: color-mix(in srgb, var(--color-border) 45%, transparent);
-    color: var(--color-text);
-    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
-    backdrop-filter: blur(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  .puzzle-btn-secondary::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 0.875rem;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-primary) 15%, transparent),
-      transparent 50%
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .puzzle-btn-secondary:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-border) 70%, transparent);
-    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
-    transform: translateY(-2px);
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.1),
-      0 0 20px color-mix(in srgb, var(--color-primary) 15%, transparent);
-  }
-
-  .puzzle-btn-secondary:hover:not(:disabled)::before {
-    opacity: 1;
-  }
-
-  .puzzle-btn-secondary:active:not(:disabled) {
-    transform: translateY(0) scale(0.95);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  }
-
-  .puzzle-btn-secondary:focus-visible {
-    outline: none;
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent),
-      0 4px 16px rgba(0, 0, 0, 0.1);
-  }
-
-  .puzzle-btn-secondary:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-    transform: none !important;
-  }
-
-  /* ===== 传送门视觉 ===== */
-  .portal-visual {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 120px;
-    height: 120px;
-    margin: 0 auto;
-  }
-
-  .portal-svg {
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.15));
-  }
-
+  /* ===== 传送门颜色变体（房间特有） ===== */
   .portal-visual-osc .portal-svg {
     filter: drop-shadow(0 0 30px rgba(52, 211, 153, 0.15));
-  }
-
-  .portal-pulse {
-    animation: portal-pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes portal-pulse {
-    0%,
-    100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.05);
-    }
-  }
-
-  /* ===== 传送门行：并排布局 ===== */
-  .conway-portals-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    margin-top: 1.5rem;
-    padding: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  /* ===== 合并后的传送门（纯图标，无卡片样式） ===== */
-  .conway-portal {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    cursor: pointer;
   }
 
   /* ===== 小屏幕适配 ===== */
@@ -350,12 +234,6 @@ function portalHref(targetId: string): string {
 
     .conway-controls {
       gap: 0.5rem;
-    }
-
-    .puzzle-btn {
-      padding: 0.5rem 1rem;
-      font-size: 1.1rem;
-      border-radius: 0.75rem;
     }
   }
 

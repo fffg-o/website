@@ -1,0 +1,174 @@
+/* ============================================================
+ * 迷宫谜题房间公共样式
+ *
+ * 所有 Maze Room（_rooms/*.astro）共享的基础 UI 组件样式。
+ * 通过 RoomLayout.astro 自动加载，新增房间无需额外导入。
+ *
+ * 包含：
+ *   1. .puzzle-btn / .puzzle-btn-secondary  → 操作按钮
+ *   2. .portals-row / .portal-link           → 传送门布局
+ *   3. .portal-visual / .portal-svg          → 传送门基础视觉
+ *   4. .portal-pulse / .portal-reveal        → 传送门动画
+ *
+ * 使用方式：房间只需写以下 HTML 结构：
+ *   <div class="portals-row">
+ *     <a href="..." class="portal-link" id="room-portal">
+ *       <div class="portal-visual">
+ *         <svg viewBox="0 0 100 100" class="portal-svg">
+ *           <circle cx="50" cy="50" r="45" fill="url(#glow)" class="portal-pulse">...</circle>
+ *         </svg>
+ *       </div>
+ *     </a>
+ *   </div>
+ *   <button class="puzzle-btn puzzle-btn-secondary">🔄</button>
+ * ============================================================ */
+
+/* ===== 操作按钮 ===== */
+.puzzle-btn {
+  padding: 0.65rem 1.25rem;
+  font-size: 1.25rem;
+  border: none;
+  border-radius: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.puzzle-btn-secondary {
+  background: color-mix(in srgb, var(--color-border) 45%, transparent);
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.puzzle-btn-secondary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0.875rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 15%, transparent),
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.puzzle-btn-secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 0 20px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.puzzle-btn-secondary:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.puzzle-btn-secondary:active:not(:disabled) {
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.puzzle-btn-secondary:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent),
+    0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.puzzle-btn-secondary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ===== 传送门行：并排布局 ===== */
+.portals-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ===== 传送门链接（纯图标，无卡片样式） ===== */
+.portal-link {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* ===== 传送门视觉基础 ===== */
+.portal-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+
+.portal-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.15));
+}
+
+/* ===== 传送门脉冲动画 ===== */
+.portal-pulse {
+  animation: portal-pulse 2s ease-in-out infinite;
+}
+
+@keyframes portal-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ===== 传送门显现动画 ===== */
+.portal-link.revealing {
+  animation: portal-reveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes portal-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-15deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(3deg);
+  }
+  70% {
+    transform: scale(0.95) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 639px) {
+  .puzzle-btn {
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+    border-radius: 0.75rem;
+  }
+}
