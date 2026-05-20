@@ -392,16 +392,6 @@ function generateMazeConnections(roomIds, slotLists, rng) {
 // ============================================================
 
 function idToLabel(id) {
-  const labelMap = {
-    lockpick: '符文之门',
-    treasure: '宝藏密室',
-    'dark-passage': '黑暗通道',
-    final: '勇者试炼',
-    minimal: 'DEV',
-  };
-
-  if (labelMap[id]) return labelMap[id];
-
   return id
     .replace(/-/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -449,18 +439,11 @@ function bfsTraversal(ids, edges) {
 
 function generateConfigContent(startRoomId, nodes, edges, portalsMap) {
   const nodesJson = JSON.stringify(nodes, null, 2);
-  const edgesJson = JSON.stringify(edges, null, 2);
-  const portalsMapJson = JSON.stringify(portalsMap, null, 2);
-
-  // 同时生成 MazeGraph 格式（from/to 格式的边，供 MazeMap 使用）
-  const mazeGraphNodesJson = JSON.stringify(
-    nodes.map((n) => ({ id: n.id, label: n.label, x: n.x, y: n.y })),
-    null, 2,
-  );
-  const mazeGraphEdgesJson = JSON.stringify(
+  const edgesJson = JSON.stringify(
     edges.map((e) => ({ from: e.source, to: e.target })),
     null, 2,
   );
+  const portalsMapJson = JSON.stringify(portalsMap, null, 2);
 
   return `// ============================================================
 // 迷宫配置文件 —— 由 scripts/generate-maze.mjs 自动生成
@@ -468,8 +451,6 @@ function generateConfigContent(startRoomId, nodes, edges, portalsMap) {
 // ============================================================
 
 import type { Portal } from '../data/maze';
-
-// ---- MazeConfig（供路由/传送门使用） ----
 
 export interface MazeConfigNode {
   id: string;
@@ -479,8 +460,8 @@ export interface MazeConfigNode {
 }
 
 export interface MazeConfigEdge {
-  source: string;
-  target: string;
+  from: string;
+  to: string;
 }
 
 export interface MazeConfig {
@@ -499,34 +480,6 @@ export const mazeConfig: MazeConfig = {
   nodes: ${nodesJson},
   edges: ${edgesJson},
   portalsMap: ${portalsMapJson},
-};
-
-// ---- MazeGraph（供 MazeMap 地图组件使用） ----
-
-export interface MazeGraphNode {
-  id: string;
-  label: string;
-  x: number;
-  y: number;
-}
-
-export interface MazeGraphEdge {
-  from: string;
-  to: string;
-}
-
-export interface MazeGraph {
-  nodes: MazeGraphNode[];
-  edges: MazeGraphEdge[];
-}
-
-/**
- * 迷宫地图数据 —— 与 maze-config 数据同源，
- * 仅边格式使用 from/to（与 MazeGraph 类型兼容）。
- */
-export const mazeGraph: MazeGraph = {
-  nodes: ${mazeGraphNodesJson},
-  edges: ${mazeGraphEdgesJson},
 };
 `;
 }

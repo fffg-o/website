@@ -13,7 +13,7 @@
 // 4. 兼容性：地图数据来源自 maze-config.generated.ts（由 generate-maze.mjs 自动生成），
 //    新增房间页面无需修改本组件
 // ============================================================
-import { mazeGraph } from '../data/maze-config.generated';
+import { mazeConfig } from '../data/maze-config.generated';
 
 interface Props {
   /** 当前房间 ID */
@@ -23,7 +23,7 @@ interface Props {
 const { currentRoomId } = Astro.props;
 
 // 将地图数据序列化后传给客户端 JS，保证新增房间时无需修改本组件
-const mazeGraphData = encodeURIComponent(JSON.stringify(mazeGraph));
+const mazeGraphData = encodeURIComponent(JSON.stringify(mazeConfig));
 // Server 端只渲染空容器，所有节点/连线由客户端 JS 动态构建
 ---
 
