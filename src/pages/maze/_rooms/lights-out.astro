@@ -524,12 +524,12 @@ function portalHref(targetId: string): string {
           cell.dataset.col = String(c);
           cell.setAttribute(
             "aria-label",
-            "灯 " +
+            "light " +
               (r + 1) +
               "-" +
               (c + 1) +
               ": " +
-              (grid[r][c] === 1 ? "亮" : "灭"),
+              (grid[r][c] === 1 ? "on" : "out"),
           );
 
           var bulb = document.createElement("span");
@@ -552,7 +552,7 @@ function portalHref(targetId: string): string {
       cell.className = "light-cell " + (isOn ? "on" : "off");
       cell.setAttribute(
         "aria-label",
-        "灯 " + (row + 1) + "-" + (col + 1) + ": " + (isOn ? "亮" : "灭"),
+        "light " + (row + 1) + "-" + (col + 1) + ": " + (isOn ? "on" : "out"),
       );
 
       // 添加点击涟漪效果

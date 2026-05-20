@@ -1,0 +1,660 @@
+---
+import MazeMap from "../../../components/MazeMap.astro";
+import type { RoomExport } from "../../../data/maze";
+import type { Portal } from "../../../data/maze";
+import { getMazeUrl } from "../../../lib/maze-url";
+
+export const room: RoomExport = {
+  id: "hanoi",
+  portalSlots: [
+    { label: "", description: "" },
+  ],
+};
+
+interface Props {
+  room: RoomExport;
+  baseUrl: string;
+  portals: Portal[];
+}
+const { room: meta, baseUrl, portals: externalPortals } = Astro.props;
+
+function portalHref(targetId: string): string {
+  return `${baseUrl}${getMazeUrl(targetId)}?from=${meta.id}`;
+}
+---
+
+<MazeMap currentRoomId={meta.id} />
+
+<div class="blog-page">
+  <article class="blog-article prose prose-zinc dark:prose-invert">
+    <div class="puzzle-room" data-puzzle-id={meta.id}>
+      <div class="puzzle-area" id="puzzle-area">
+        <div class="hanoi-container" id="hanoi-container">
+          <div class="hanoi-peg" data-peg="0" id="hanoi-peg-0">
+            <div class="hanoi-marker"></div>
+            <div class="hanoi-disks" id="hanoi-disks-0"></div>
+          </div>
+          <div class="hanoi-peg" data-peg="1" id="hanoi-peg-1">
+            <div class="hanoi-marker"></div>
+            <div class="hanoi-disks" id="hanoi-disks-1"></div>
+          </div>
+          <div class="hanoi-peg" data-peg="2" id="hanoi-peg-2">
+            <div class="hanoi-marker"></div>
+            <div class="hanoi-disks" id="hanoi-disks-2"></div>
+          </div>
+        </div>
+
+        <div class="hanoi-controls">
+          <button class="puzzle-btn puzzle-btn-secondary" id="reset-btn" title="">🔄</button>
+        </div>
+      </div>
+
+      <div class="conway-portals-row" id="conway-portals-row">
+        {
+          externalPortals.map((portal) => (
+            <a
+              href={portalHref(portal.targetId)}
+              class="conway-portal"
+              id="room-portal"
+              style="display:none"
+            >
+              <div class="portal-visual">
+                <svg viewBox="0 0 100 100" class="portal-svg">
+                  <defs>
+                    <radialGradient id="portal-glow-hanoi" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.8"></stop>
+                      <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.3"></stop>
+                      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"></stop>
+                    </radialGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="45" fill="url(#portal-glow-hanoi)" class="portal-pulse">
+                    <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="20" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.6">
+                    <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <circle cx="50" cy="50" r="10" fill="none" stroke="#fde68a" stroke-width="1.5" opacity="0.4">
+                    <animate attributeName="r" values="10;40;10" dur="4s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"></animate>
+                  </circle>
+                  <text x="50" y="55" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="bold">✦</text>
+                </svg>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </article>
+  <aside class="blog-toc-sidebar"></aside>
+</div>
+
+<style is:global>
+  /* ===== 汉诺塔容器 ===== */
+  .hanoi-container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem 1rem;
+    margin: 0.5rem auto;
+    background: color-mix(in srgb, var(--color-border) 30%, transparent);
+    border-radius: 1.5rem;
+    max-width: 100%;
+    width: 100%;
+    min-height: 280px;
+  }
+
+  /* ===== 单个柱子 ===== */
+  .hanoi-peg {
+    position: relative;
+    flex: 1;
+    max-width: 190px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 0.75rem;
+    transition: box-shadow 0.25s ease, background 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    padding-bottom: 10px;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* 柱子竖杆 */
+  .hanoi-peg::before {
+    content: "";
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 80%;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-border) 60%, transparent),
+      color-mix(in srgb, var(--color-border) 30%, transparent)
+    );
+    border-radius: 4px;
+    z-index: 0;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  /* 柱子底座 */
+  .hanoi-peg::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    height: 10px;
+    background: color-mix(in srgb, var(--color-border) 50%, transparent);
+    border-radius: 5px;
+    z-index: 1;
+  }
+
+  /* ===== 选中柱子 ===== */
+  .hanoi-peg.selected {
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    box-shadow:
+      0 0 20px color-mix(in srgb, var(--color-primary) 20%, transparent),
+      inset 0 0 20px color-mix(in srgb, var(--color-primary) 8%, transparent);
+  }
+
+  .hanoi-peg.selected::before {
+    background: linear-gradient(
+      to top,
+      var(--color-primary),
+      color-mix(in srgb, var(--color-primary) 60%, transparent)
+    );
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  }
+
+  /* ===== 圆盘容器 ===== */
+  .hanoi-disks {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    width: 100%;
+    padding: 0 4px;
+    gap: 3px;
+  }
+
+  /* ===== 单个圆盘 ===== */
+  .hanoi-disk {
+    height: 26px;
+    border-radius: 13px;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.2s ease,
+                opacity 0.2s ease;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  /* 圆盘尺寸 */
+  .hanoi-disk.size-1 { width: 55px; background: linear-gradient(135deg, #fb923c, #f97316); }
+  .hanoi-disk.size-2 { width: 85px; background: linear-gradient(135deg, #facc15, #eab308); }
+  .hanoi-disk.size-3 { width: 115px; background: linear-gradient(135deg, #4ade80, #22c55e); }
+  .hanoi-disk.size-4 { width: 145px; background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+
+  /* 圆盘光泽效果 */
+  .hanoi-disk::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 15%;
+    width: 40%;
+    height: 8px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.35),
+      rgba(255, 255, 255, 0.05)
+    );
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  /* ===== 最顶层圆盘 hover（仅未选中时） ===== */
+  .hanoi-peg:not(.selected) .hanoi-disk:last-child:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  }
+
+  .hanoi-peg:not(.selected) .hanoi-disk:last-child:active {
+    transform: translateY(-2px) scale(1.01);
+  }
+
+  /* ===== 选中时顶层圆盘升起 ===== */
+  .hanoi-peg.selected .hanoi-disk:last-child {
+    transform: translateY(-28px) scale(1.04);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+    opacity: 0.9;
+  }
+
+  /* ===== 柱顶指示标记 ===== */
+  .hanoi-marker {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem;
+    z-index: 5;
+    line-height: 1;
+    display: none;
+    pointer-events: none;
+  }
+
+  .hanoi-peg.selected .hanoi-marker {
+    display: block;
+  }
+
+  /* ===== 非法移动抖动 ===== */
+  .hanoi-peg.shake {
+    animation: hanoi-shake 0.45s ease;
+  }
+
+  @keyframes hanoi-shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-8px); }
+    30% { transform: translateX(8px); }
+    45% { transform: translateX(-6px); }
+    60% { transform: translateX(6px); }
+    75% { transform: translateX(-3px); }
+    90% { transform: translateX(3px); }
+  }
+
+  /* ===== 非法移动红色闪烁 ===== */
+  .hanoi-peg.invalid {
+    animation: hanoi-invalid 0.45s ease;
+  }
+
+  @keyframes hanoi-invalid {
+    0%, 100% { box-shadow: none; }
+    25% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), inset 0 0 20px rgba(239, 68, 68, 0.15); }
+    50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.6), inset 0 0 30px rgba(239, 68, 68, 0.2); }
+    75% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), inset 0 0 20px rgba(239, 68, 68, 0.15); }
+  }
+
+  /* ===== 胜利动画：圆盘依次飞出 ===== */
+  .hanoi-disk.victory {
+    animation: hanoi-victory 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes hanoi-victory {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-60px) scale(0.3); opacity: 0; }
+  }
+
+  /* ===== 控制按钮 ===== */
+  .hanoi-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  /* ===== 传送门行 ===== */
+  .conway-portals-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    padding: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .conway-portal {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .portal-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+  }
+
+  .portal-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.15));
+  }
+
+  .portal-pulse {
+    animation: portal-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes portal-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* ===== 按钮基础样式（复用） ===== */
+  .puzzle-btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 1.25rem;
+    border: none;
+    border-radius: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.02em;
+    position: relative;
+    overflow: hidden;
+    line-height: 1;
+  }
+
+  .puzzle-btn-secondary {
+    background: color-mix(in srgb, var(--color-border) 45%, transparent);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .puzzle-btn-secondary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0.875rem;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary) 15%, transparent),
+      transparent 50%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .puzzle-btn-secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-border) 70%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.1),
+      0 0 20px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  }
+
+  .puzzle-btn-secondary:hover:not(:disabled)::before {
+    opacity: 1;
+  }
+
+  .puzzle-btn-secondary:active:not(:disabled) {
+    transform: translateY(0) scale(0.95);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .puzzle-btn-secondary:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .puzzle-btn-secondary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ===== 传送门显现动画 ===== */
+  .conway-portal.revealing {
+    animation: portal-reveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes portal-reveal {
+    0% {
+      opacity: 0;
+      transform: scale(0.3) rotate(-15deg);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.15) rotate(3deg);
+    }
+    70% {
+      transform: scale(0.95) rotate(-1deg);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 639px) {
+    .hanoi-container {
+      gap: 0.4rem;
+      padding: 1rem 0.5rem 0.75rem;
+      min-height: 230px;
+    }
+
+    .hanoi-peg {
+      max-width: 130px;
+      padding-bottom: 8px;
+    }
+
+    .hanoi-peg::before {
+      width: 6px;
+    }
+
+    .hanoi-peg::after {
+      height: 8px;
+    }
+
+    .hanoi-disk {
+      height: 22px;
+      border-radius: 11px;
+    }
+
+    .hanoi-disk.size-1 { width: 40px; }
+    .hanoi-disk.size-2 { width: 60px; }
+    .hanoi-disk.size-3 { width: 80px; }
+    .hanoi-disk.size-4 { width: 100px; }
+
+    .hanoi-peg.selected .hanoi-disk:last-child {
+      transform: translateY(-22px) scale(1.04);
+    }
+
+    .hanoi-controls {
+      margin-top: 0.75rem;
+    }
+
+    .puzzle-btn {
+      padding: 0.5rem 1rem;
+      font-size: 1.1rem;
+      border-radius: 0.75rem;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .hanoi-container {
+      gap: 0.25rem;
+      padding: 0.75rem 0.25rem 0.5rem;
+      min-height: 190px;
+    }
+
+    .hanoi-peg {
+      max-width: 100px;
+    }
+
+    .hanoi-disk {
+      height: 18px;
+      border-radius: 9px;
+    }
+
+    .hanoi-disk.size-1 { width: 32px; }
+    .hanoi-disk.size-2 { width: 48px; }
+    .hanoi-disk.size-3 { width: 64px; }
+    .hanoi-disk.size-4 { width: 80px; }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+(function () {
+  "use strict";
+
+  // ============================================================
+  // 汉诺塔核心逻辑
+  // ============================================================
+
+  var NUM_DISKS = 4;
+  var pegs = [[], [], []];
+  var selectedPeg = -1;
+  var solved = false;
+
+  var resetBtn = document.getElementById("reset-btn");
+  var portalEl = document.getElementById("room-portal");
+
+  // ============================================================
+  // 初始化
+  // ============================================================
+
+  function initGame() {
+    pegs = [[], [], []];
+    for (var i = NUM_DISKS; i >= 1; i--) {
+      pegs[0].push(i);
+    }
+    selectedPeg = -1;
+    solved = false;
+  }
+
+  // ============================================================
+  // 渲染
+  // ============================================================
+
+  function render() {
+    for (var p = 0; p < 3; p++) {
+      var disksEl = document.getElementById("hanoi-disks-" + p);
+      if (!disksEl) continue;
+
+      disksEl.innerHTML = "";
+      var stack = pegs[p];
+      for (var d = 0; d < stack.length; d++) {
+        var disk = document.createElement("div");
+        disk.className = "hanoi-disk size-" + stack[d];
+        disksEl.appendChild(disk);
+      }
+
+      // 选中状态
+      disksEl.parentElement.classList.toggle("selected", p === selectedPeg && stack.length > 0);
+    }
+  }
+
+  // ============================================================
+  // 游戏逻辑
+  // ============================================================
+
+  function handlePegClick(index) {
+    if (selectedPeg === -1) {
+      if (pegs[index].length === 0) return;
+      selectedPeg = index;
+      render();
+      return;
+    }
+
+    if (selectedPeg === index) {
+      selectedPeg = -1;
+      render();
+      return;
+    }
+
+    var from = selectedPeg;
+    var to = index;
+    var disk = pegs[from][pegs[from].length - 1];
+    var targetStack = pegs[to];
+    var targetTop = targetStack.length > 0 ? targetStack[targetStack.length - 1] : null;
+
+    if (targetTop === null || targetTop > disk) {
+      targetStack.push(disk);
+      pegs[from].pop();
+      selectedPeg = -1;
+      render();
+      checkWin();
+    } else {
+      showInvalid(to);
+    }
+  }
+
+  function showInvalid(pegIndex) {
+    var pegEl = document.getElementById("hanoi-peg-" + pegIndex);
+    if (!pegEl) return;
+    pegEl.classList.add("shake", "invalid");
+    setTimeout(function () {
+      pegEl.classList.remove("shake", "invalid");
+    }, 450);
+  }
+
+  // ============================================================
+  // 胜利检测
+  // ============================================================
+
+  function checkWin() {
+    if (pegs[2].length === NUM_DISKS && !solved) {
+      solved = true;
+      revealPortal(portalEl);
+    }
+  }
+
+  // ============================================================
+  // 传送门显现
+  // ============================================================
+
+  function revealPortal(el) {
+    if (!el) return;
+    el.style.display = "block";
+    el.classList.add("revealing");
+    setTimeout(function () {
+      el.classList.remove("revealing");
+    }, 800);
+  }
+
+  // ============================================================
+  // 重置
+  // ============================================================
+
+  function resetGame() {
+    initGame();
+    if (portalEl) {
+      portalEl.style.display = "none";
+      portalEl.classList.remove("revealing");
+    }
+    render();
+  }
+
+  // ============================================================
+  // 初始化交互
+  // ============================================================
+
+  function init() {
+    initGame();
+    render();
+
+    for (var p = 0; p < 3; p++) {
+      var pegEl = document.getElementById("hanoi-peg-" + p);
+      if (pegEl) {
+        pegEl.addEventListener("click", function (idx) {
+          return function () { handlePegClick(idx); };
+        }(p));
+      }
+    }
+
+    if (resetBtn) resetBtn.addEventListener("click", resetGame);
+  }
+
+  init();
+})();
+</script>
