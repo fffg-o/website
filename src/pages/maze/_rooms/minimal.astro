@@ -1,38 +1,21 @@
 ---
 // ============================================================
-// 最简界面 —— 纯开发用途
+// DEV 开发面板
 //
-// 没有任何内容，只有跳转链接，用于开发调试。
+// 自动发现所有 _rooms/*.astro 房间并列出跳转链接。
+// 不参与迷宫图生成（portalSlots 为空），不在迷宫连接中。
+// 新增房间后无需修改本文件。
 // ============================================================
 import MazeMap from '../../../components/MazeMap.astro';
-import type { RoomExport } from '../../../data/maze';
-import type { Portal } from '../../../data/maze';
+import type { RoomExport, Portal } from '../../../data/maze';
 import { getMazeUrl } from '../../../lib/maze-url';
 
-// 页面元数据（局部常量，不导出）
-const title = '最简界面（开发用）';
-const description = '纯开发用途，只有一个跳转链接。';
-const date = '2026-05-13';
-const tags = ['迷宫', '开发'];
+const title = 'DEV';
+const description = '自动发现所有房间，方便开发快速跳转。';
 
-/** 迷宫基础设施读取的导出数据 */
 export const room: RoomExport = {
   id: 'minimal',
-  portalSlots: [
-    { label: '前往符文之门', description: '第一个迷宫房间' },
-    { label: '前往宝藏密室', description: '寻宝之旅' },
-    { label: '前往黑暗通道', description: '探索未知' },
-    { label: '前往勇者试炼', description: '最终挑战' },
-    { label:"test",description:"test"}
-  ],
-  /** 固定传送门，不由生成器随机分配 */
-  portals: [
-    { label: '前往符文之门', description: '第一个迷宫房间', targetId: 'lockpick' },
-    { label: '前往宝藏密室', description: '寻宝之旅', targetId: 'treasure' },
-    { label: '前往黑暗通道', description: '探索未知', targetId: 'dark-passage' },
-    { label: '前往勇者试炼', description: '最终挑战', targetId: 'final' },
-    { label:"test",description:"test",targetId:"test"}
-  ],
+  portalSlots: [],
 };
 
 interface Props {
@@ -40,26 +23,33 @@ interface Props {
   baseUrl: string;
   portals: Portal[];
 }
-const { room: meta, baseUrl, portals } = Astro.props;
+const { room: meta, baseUrl } = Astro.props;
 
 function portalHref(targetId: string): string {
   return `${baseUrl}${getMazeUrl(targetId)}`;
 }
+
+// 自动扫描所有房间文件，提取 room.id
+const roomModules = import.meta.glob('/src/pages/maze/_rooms/*.astro', { eager: true });
+const allRoomIds: string[] = Object.values(roomModules).map(
+  (mod: unknown) => (mod as { room: RoomExport }).room.id,
+);
+const otherRoomIds = allRoomIds.filter((id) => id !== meta.id).sort();
 ---
 
 <MazeMap currentRoomId={meta.id} />
 <div class="minimal-page">
   <div class="minimal-container">
-    <div class="minimal-badge">DEV</div>
-    <h1 class="minimal-title">{title}</h1>
+    <div class="minimal-badge">{title}</div>
+    <h1 class="minimal-title">开发面板</h1>
     <p class="minimal-desc">{description}</p>
+    <p class="minimal-count">{otherRoomIds.length} 个房间已注册</p>
     <div class="minimal-links">
       {
-        portals.map((portal) => (
-          <a href={portalHref(portal.targetId)} class="minimal-link">
-            <span class="minimal-link-label">{portal.label}</span>
-            {portal.description && <span class="minimal-link-desc">{portal.description}</span>}
-            <span class="minimal-link-arrow">→</span>
+        otherRoomIds.map((id) => (
+          <a href={portalHref(id)} class="minimal-link">
+            <span class="minimal-link-label">{id}</span>
+            <span class="minimal-link-arrow">&rarr;</span>
           </a>
         ))
       }
@@ -108,7 +98,11 @@ function portalHref(targetId: string): string {
   .minimal-desc {
     font-size: 0.875rem;
     color: var(--color-text-muted);
-    margin-bottom: 0.5rem;
+  }
+
+  .minimal-count {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
   }
 
   .minimal-links {
@@ -142,11 +136,6 @@ function portalHref(targetId: string): string {
     color: var(--color-text);
     flex: 1;
     text-align: left;
-  }
-
-  .minimal-link-desc {
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
   }
 
   .minimal-link-arrow {
