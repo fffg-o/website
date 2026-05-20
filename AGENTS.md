@@ -34,3 +34,19 @@ There are no lint, typecheck, or test scripts. Verification is `npm run build`.
 - Build order matters: `generate:maze` runs before `astro build`, and `pagefind` runs after. Do not skip or reorder.
 - Do not move `$$...$$` math rendering from the loader into remark-math — it will break.
 - Node >= 22.12.0 is required (per `engines` field).
+
+## Maze room development rules
+当开发或修改迷宫（maze）相关的房间（room）时，必须遵守以下规则：
+
+画面中不要出现文字：所有功能提示、交互说明、状态反馈等，均使用 Emoji 代替文字。避免任何中文、英文或数字字符串（除非作为数据存储的键名，但不显示给用户）
+
+制作 room 时不要引入新的依赖：必须使用项目已有的依赖和原生 Web API 来完成 room 的逻辑和渲染。已有依赖包括但不限于：
+
+Astro, Tailwind CSS v4
+
+项目内已有的工具函数（如 src/lib/ 下的模块）
+
+不新增任何 npm 包。如果当前能力无法实现某个特性，应改用现有能力重新设计实现方案。
+
+## 交互要求
+- Reply 回答要用中文回复
