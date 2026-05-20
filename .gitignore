@@ -27,3 +27,5 @@ pnpm-debug.log*
 # Plain Markdown source files — only the encrypted .md.enc variants are tracked
 # To work locally: edit .md files, then run `npm run encrypt` to regenerate .md.enc
 src/content/**/*.md
+
+src/data/maze-config.generated.ts
