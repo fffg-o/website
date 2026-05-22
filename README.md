@@ -67,37 +67,32 @@ website/
 ### 加解密命令
 
 ```bash
-# 加密所有 .md 文件为 .md.enc
-node scripts/encrypt.mjs
-
-# 解密所有 .md.enc 文件为 .md
-node scripts/encrypt.mjs --decrypt
-
-# 预览加密变更（不写入）
-node scripts/encrypt.mjs --dry
-
-# 加密/解密单个文件
-node scripts/encrypt.mjs path/to/file.md
-node scripts/encrypt.mjs --decrypt path/to/file.md.enc
+pnpm encrypt                   加密所有 .md 文件
+pnpm encrypt --decrypt         解密所有 .md.enc 文件
+pnpm encrypt --dry             预览加密变更
+pnpm encrypt <file>            加密单个文件
+pnpm encrypt --decrypt <file>  解密单个文件
 ```
 
 ## 本地开发
 
 ```bash
+# 安装pnpm
+npm install -g pnpm
 # 安装依赖
-npm install
+pnpm install
 
 # 设置加密密钥（确保能解密内容）
 export CONTENT_KEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 
 # 启动开发服务器
-npm run dev
+pnpm dev
 
 # 构建生产版本（含 Pagefind 搜索索引）
-npm run build
+pnpm build
 
 # 预览构建结果
-npm run preview
+pnpm preview
 ```
 
 ## 脚本工具
@@ -108,14 +103,14 @@ npm run preview
 
 ```bash
 # 交互式创建博客
-npm run create:post
+pnpm create:post
 
 # 交互式创建随笔
-npm run create:note
+pnpm create:note
 
 # 非交互式创建
-node scripts/create.mjs blog "文章标题" -d "描述" -t "标签1,标签2" -s "系列名"
-node scripts/create.mjs note "标题" -d "描述" -t "标签1,标签2"
+pnpm create:blog "文章标题" -d "描述" -t "标签1,标签2" -s "系列名"
+pnpm create:note "标题" -d "描述" -t "标签1,标签2"
 ```
 
 创建后若 `CONTENT_KEY` 已设置，会自动加密为 `.md.enc`。
@@ -126,13 +121,13 @@ node scripts/create.mjs note "标题" -d "描述" -t "标签1,标签2"
 
 ```bash
 # 规范化单个文件
-npm run normalize src/content/note/20260509.md
+pnpm normalize src/content/note/20260509.md
 
 # 规范化所有 content 文件
-npm run normalize:all
+pnpm normalize:all
 
 # 预览变更
-npm run normalize:all --dry
+pnpm normalize:all --dry
 ```
 
 ## Markdown 特性
