@@ -147,6 +147,16 @@ function parseFrontmatter(content: string): {
     data[key] = rawValue;
   }
 
+  if (typeof data.date === 'string') {
+    const parts = data.date.split('-');
+    if (parts.length === 3) {
+      const y = parts[0].padStart(4, '0');
+      const m = parts[1].padStart(2, '0');
+      const d = parts[2].padStart(2, '0');
+      data.date = `${y}-${m}-${d}`;
+    }
+  }
+
   return { data, body };
 }
 
