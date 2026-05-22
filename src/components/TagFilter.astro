@@ -220,7 +220,7 @@ const sortedTags = tags
 
 <script>
   class TagFilterController {
-    private activeTag: string = '';
+    private activeTags: string[] = [];
     private buttons: NodeListOf<HTMLButtonElement>;
     private articles: HTMLElement[];
     private container: HTMLElement;
@@ -236,7 +236,7 @@ const sortedTags = tags
       const params = new URLSearchParams(window.location.search);
       const tagParam = params.get('tag');
       if (tagParam) {
-        this.activeTag = tagParam;
+        this.activeTags = tagParam.split(',').map(t => t.trim()).filter(Boolean);
       }
 
       this.applyFilter();
@@ -244,7 +244,8 @@ const sortedTags = tags
 
       window.addEventListener('popstate', () => {
         const params = new URLSearchParams(window.location.search);
-        this.activeTag = params.get('tag') || '';
+        const tagParam = params.get('tag');
+        this.activeTags = tagParam ? tagParam.split(',').map(t => t.trim()).filter(Boolean) : [];
         this.applyFilter();
       });
     }
@@ -253,30 +254,41 @@ const sortedTags = tags
       this.buttons.forEach((btn) => {
         btn.addEventListener('click', () => {
           const tag = btn.getAttribute('data-tag') || '';
-          this.activeTag = tag;
-          this.updateURL(tag);
+          if (!tag) {
+            this.activeTags = [];
+          } else {
+            const idx = this.activeTags.indexOf(tag);
+            if (idx >= 0) {
+              this.activeTags.splice(idx, 1);
+            } else {
+              this.activeTags.push(tag);
+            }
+          }
+          this.updateURL();
           this.applyFilter();
         });
       });
     }
 
-    private updateURL(tag: string) {
+    private updateURL() {
       const url = new URL(window.location.href);
-      if (tag) {
-        url.searchParams.set('tag', tag);
+      if (this.activeTags.length > 0) {
+        url.searchParams.set('tag', this.activeTags.join(','));
       } else {
         url.searchParams.delete('tag');
       }
-      window.history.pushState({ tag }, '', url.toString());
+      window.history.pushState({ tags: [...this.activeTags] }, '', url.toString());
     }
 
     private applyFilter() {
+      const activeSet = new Set(this.activeTags);
+
       this.buttons.forEach((btn) => {
         const btnTag = btn.getAttribute('data-tag') || '';
-        btn.classList.toggle('active', this.activeTag === btnTag);
+        btn.classList.toggle('active', btnTag !== '' && activeSet.has(btnTag));
       });
 
-      if (!this.activeTag) {
+      if (this.activeTags.length === 0) {
         this.articles.forEach((article) => {
           article.classList.remove('hidden-by-filter');
           article.style.animation = 'none';
@@ -285,11 +297,11 @@ const sortedTags = tags
         return;
       }
 
-      const lowerTag = this.activeTag.toLowerCase();
+      const activeLower = this.activeTags.map(t => t.toLowerCase());
       this.articles.forEach((article) => {
         const articleTags = article.getAttribute('data-tags') || '';
-        const tagList = articleTags.split(/\s+/).filter(Boolean);
-        const match = tagList.some((t) => t.toLowerCase() === lowerTag);
+        const tagList = articleTags.split(/\s+/).filter(Boolean).map(t => t.toLowerCase());
+        const match = activeLower.every(tag => tagList.includes(tag));
 
         if (match) {
           article.classList.remove('hidden-by-filter');
